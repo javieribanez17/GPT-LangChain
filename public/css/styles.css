@@ -1,0 +1,13 @@
+.containerG{
+    width: 80%;
+    height: 100vh;
+    margin-left: 10%;
+    margin-top: 50px;
+}
+.containerFlexButton{
+    display: flex;
+    justify-content: center;
+}
+.btn-primary{
+    margin-top: 10px;
+}
