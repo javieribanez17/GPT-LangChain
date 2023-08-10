@@ -13,20 +13,63 @@ const { OpenAI } = require("langchain/llms/openai");
 const { PromptTemplate } = require("langchain/prompts");
 const { LLMChain } = require("langchain/chains");
 const { StructuredOutputParser } = require("langchain/output_parsers");
+const { z } = require("zod");
 //Paquetes de LangChain para Embeddings
 /*const { BufferMemory } = require("langchain/memory");
 const { ConversationChain } = require("langchain/chains");*/
 //Variables de entorno
 const PORT = process.env.PORT || 5000;
 //------------------------------------- Modelo para Janssen -------------------------------------
-const parser = StructuredOutputParser.fromNamesAndDescriptions({
-  medicamentos: "Medicamentos consumidos por el paciente",
-  sintomas: "Sintomas que tiene el paciente",
-});
+// const parser = StructuredOutputParser.fromNamesAndDescriptions({
+//   medicamentos: "Medicamentos consumidos por el paciente separados ','",
+//   sintomas: "Sintomas que tiene el paciente separados por ','",
+// });
+const parser = StructuredOutputParser.fromZodSchema(
+  z.object({
+    paciente: z.object({
+      genero: z.string().describe("Genero del paciente"),
+      iniciales: z
+        .string()
+        .describe("Letras iniciales del nombre del paciente"),
+      edad: z.string().describe("Edad del paciente al presentar la queja"),
+      nacimiento: z.string().describe("Fecha de nacimiento"),
+      altura: z.string().describe("Estatura del paciente"),
+      peso: z.string().describe("Peso del paciente"),
+    }),
+    descripcion: z.object({
+      indicacion: z.string().describe("Indicación del paciente"),
+      medicacion: z.string().describe("Medicación previa del paciente"),
+      id: z.string().describe("ID del paciente"),
+      medicamentos: z
+        .array(z.string())
+        .describe("Medicamentos consumidos por el paciente"),
+      via: z.string().describe("Vía de administración del medicamento"),
+      dosis: z.string().describe("Dosis del medicamento consumida"),
+      sintomas: z.array(z.string()).describe("Sintomas del paciente"),
+    }),
+    producto: z.object({
+      nombre: z.string().describe("Nombre dle producto"),
+      lugar: z.string().describe("Donde fue comprado el prodcuto"),
+    }),
+    informante: z.object({
+      tipo: z.string().describe("Tipo de informante que realizó el reporte"),
+      nombre: z.string().describe("Nombre del informante"),
+      pais: z.string().describe("País desde donde reporta"),
+    }),
+    fechas: z.object({
+      notificacion: z
+        .string()
+        .describe("Fecha de la primera notificación o reporte"),
+      actual: z.string().describe("Fecha actual del reporte"),
+      uso: z
+        .string()
+        .describe("Cuando empezó el paciente a consumir el medicamento"),
+    }),
+  })
+);
 const formatInstructions = parser.getFormatInstructions();
 const prompt = new PromptTemplate({
-  template:
-    "Dime los medicamentos que ha consumido el paciente y los sintomas que tiene segun el texto: {text}\n{format_instructions}",
+  template: "Extrae la información del reporte: {text}\n{format_instructions}",
   inputVariables: ["text"],
   partialVariables: { format_instructions: formatInstructions },
 });
@@ -66,6 +109,10 @@ app.get("/", async function (req, res) {
     respondModel: respondModel.text,
     consultPrev: consultPrev,
   });
+});
+
+app.get("/test", (req, res) => {
+  res.render("table");
 });
 
 app.post("/gpt", async function (req, res) {
