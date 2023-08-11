@@ -113,6 +113,7 @@ app.get("/", async function (req, res) {
     const test2 = await chain2.call({ input: "Cómo me llamo?" });
     console.log(test2);*/
   res.render("home", {
+    paciente: jsonArray,
     respondModel: respondModel.text,
     consultPrev: consultPrev,
   });
@@ -121,6 +122,7 @@ app.get("/", async function (req, res) {
 app.get("/test", (req, res) => {
   const paciente = {
     paciente: {
+      triage: "cualquiera",
       genero: "Femenino",
       iniciales: "C",
       edad: "18",

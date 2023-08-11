@@ -14,7 +14,36 @@
         <h1>Consultas de reportes de afectación</h1>
         <div class="form-group">
             <label for="askModel">Respuesta del modelo GPT:</label>
-            <textarea class="form-control" disabled="true" id="askModel" rows="10"><%= respondModel %></textarea>
+            <div class="containerTable">
+                <div class="horizontal-table">
+                    <% let isFirst=true; %>
+                        <% for (jso in paciente) { %>
+                            <% if (isFirst) { %>
+                                <div id="head" class="horizontal-row">
+                                    <% for (const key in paciente[jso]) { %>
+                                        <% for (const info in paciente[jso][key]) { %>
+                                            <div class="horizontal-cell">
+                                                <%= info %>
+                                            </div>
+                                            <% } %>
+                                                <% } %>
+                                </div>
+                                <% isFirst=false; %>
+                                    <% } %>
+
+                                        <div class="horizontal-row">
+                                            <% for (const key in paciente[jso]) { %>
+                                                <% for (const info in paciente[jso][key]) { %>
+                                                    <div class="horizontal-cell">
+                                                        <%= paciente[jso][key][info] %>
+                                                    </div>
+                                                    <% } %>
+                                                        <% } %>
+                                        </div>
+                                        <% } %>
+                </div>
+            </div>
+            <!-- <textarea class="form-control" disabled="true" id="askModel" rows="10"><%= respondModel %></textarea> -->
         </div>
         <p>Reporte adverso consultado: <i><strong>
                     <%= consultPrev %>

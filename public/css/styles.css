@@ -1,13 +1,38 @@
-.containerG{
-    width: 80%;
-    height: 100vh;
-    margin-left: 10%;
-    margin-top: 50px;
+.containerG {
+  width: 80%;
+  height: 100vh;
+  margin-left: 10%;
+  margin-top: 50px;
 }
-.containerFlexButton{
-    display: flex;
-    justify-content: center;
+.containerTable {
+  width: 100%;
+  overflow: auto;
+  height: 33vh;
 }
-.btn-primary{
-    margin-top: 10px;
+.containerFlexButton {
+  display: flex;
+  justify-content: center;
+}
+.btn-primary {
+  margin-top: 10px;
+}
+.horizontal-table {
+  display: table;
+  font-size: 16px;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.horizontal-row {
+  display: table-row;
+}
+
+.horizontal-cell {
+  display: table-cell;
+  border: 1px solid #ccc;
+  padding: 5px;
+}
+#head {
+  font-weight: bold;
+  text-align: center;
 }

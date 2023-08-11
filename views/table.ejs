@@ -7,52 +7,36 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <link rel="stylesheet" href="/css/styles.css">
-    <style>
-        .horizontal-table {
-            display: table;
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .horizontal-row {
-            display: table-row;
-        }
-
-        .horizontal-cell {
-            display: table-cell;
-            border: 1px solid #ccc;
-            padding: 8px;
-        }
-        #head{
-            font-weight: bold;
-        }
-    </style>
 </head>
 
 <body>
     <h1>info del paciente</h1>
     <div class="horizontal-table">
-        <% let isFirst = true; %>
-        <% for (jso in paciente) { %>
-            <% if (isFirst) { %>
-            <div id="head" class="horizontal-row">
-                <% for (const key in paciente[jso]) { %>
-                    <% for (const info in paciente[jso][key]) { %>
-                        <div class="horizontal-cell"><%= info %></div>
-                    <% } %>
-                <% } %>  
-            </div>
-            <% isFirst = false; %>
-            <% } %>
-          
-            <div class="horizontal-row">
-                <% for (const key in paciente[jso]) { %>
-                    <% for (const info in paciente[jso][key]) { %>
-                        <div class="horizontal-cell"><%= paciente[jso][key][info] %></div>
-                    <% } %>
-                <% } %>
-            </div>
-        <% } %>   
+        <% let isFirst=true; %>
+            <% for (jso in paciente) { %>
+                <% if (isFirst) { %>
+                    <div id="head" class="horizontal-row">
+                        <% for (const key in paciente[jso]) { %>
+                            <% for (const info in paciente[jso][key]) { %>
+                                <div class="horizontal-cell">
+                                    <%= info %>
+                                </div>
+                                <% } %>
+                                    <% } %>
+                    </div>
+                    <% isFirst=false; %>
+                        <% } %>
+
+                            <div class="horizontal-row">
+                                <% for (const key in paciente[jso]) { %>
+                                    <% for (const info in paciente[jso][key]) { %>
+                                        <div class="horizontal-cell">
+                                            <%= paciente[jso][key][info] %>
+                                        </div>
+                                        <% } %>
+                                            <% } %>
+                            </div>
+                            <% } %>
     </div>
 
 
