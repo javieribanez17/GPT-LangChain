@@ -3,6 +3,10 @@ const express = require("express");
 const ejs = require("ejs");
 const app = express();
 const bodyParser = require("body-parser");
+//Demo 2
+const multer = require("multer");
+const fs = require("fs");
+const pdf = require("pdf-parse");
 //Declaraciones necesarias
 require("dotenv").config();
 app.set("view engine", "ejs");
@@ -88,6 +92,19 @@ const chain = new LLMChain({
   llm: model,
   prompt: prompt,
 });
+//Archivos
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads"); // Ruta donde se guardarán los archivos subidos
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname); // Usa el nombre original del archivo
+  },
+});
+const upload = multer({ storage });
+let respondModelA = [];
+let qModel = "";
+let pdfTitle = "";
 //--------------------------------------------------------------------------
 //Certificado deshabilitado
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -112,52 +129,22 @@ app.get("/", async function (req, res) {
     console.log(test1);
     const test2 = await chain2.call({ input: "Cómo me llamo?" });
     console.log(test2);*/
-  res.render("home", {
+  res.render("home");
+  // res.render("demo1", {
+  //   respondModel: respondModel.text,
+  //   consultPrev: consultPrev,
+  // });
+});
+
+app.get("/demo1", (req, res) => {
+  res.render("demo1", {
     respondModel: respondModel.text,
     consultPrev: consultPrev,
   });
 });
 
-app.get("/test", (req, res) => {
-  const paciente = {
-    paciente: {
-      genero: "Femenino",
-      iniciales: "C",
-      edad: "18",
-      nacimiento: "2003-01-01",
-      altura: "160 cm",
-      peso: "60 kg",
-    },
-    descripcion: {
-      indicacion: "Dolor de cabeza",
-      medicacion: "Ninguna",
-      id: "col-1234",
-      medicamentos: ["Acetaminofen", "hiola", "aaaa"],
-      via: "Oral",
-      dosis: "500 mg",
-      sintomas: ["Dolor de cabeza", "Vómitos"],
-    },
-    producto: {
-      nombre: "",
-      lugar: "",
-    },
-    informante: {
-      tipo: "Paciente",
-      nombre: "Carolina Mesa",
-      pais: "Colombia",
-    },
-    fechas: {
-      notificacion: "2021-09-15",
-      actual: "2021-09-15",
-      uso: "2021-09-14",
-    },
-  };
-  jsonArray.push(paciente);
-  res.render("table", {
-    //paciente: jsonOutputM
-    paciente: jsonArray,
-    //paciente: paciente
-  });
+app.get("/demo2", (req, res) => {
+  res.render("upload");
 });
 
 app.post("/gpt", async function (req, res) {
@@ -180,8 +167,66 @@ app.post("/gpt", async function (req, res) {
       " y los sintomas son: " +
       jsonOutputM.sintomas
   );*/
-  res.redirect("/");
+  res.redirect("/demo1");
 });
+//Página con archivo de carga
+app
+  .route("/upload")
+  .get((req, res) => {
+    res.render("upload");
+  })
+  .post((req, res) => {
+    res.render("upload");
+  });
+
+//Attach file
+app
+  .route("/load")
+  .get((req, res) => {
+    res.render("home2", {
+      pdfTitle: pdfTitle,
+      paciente: respondModelA,
+      consultPrev: consultPrev,
+    });
+  })
+  .post(upload.single("loadFile"), async (req, res) => {
+    //Variables locales
+    let pdfPath = req.file.path;
+    pdfTitle = req.file.originalname;
+    let contentPdf = "";
+    let vectorStore = "";
+    //Lectura del PDF
+    const databuffer = fs.readFileSync(pdfPath);
+    await pdf(databuffer).then(function (data) {
+      contentPdf = data.text;
+      //res.send(contentPdf);
+    });
+    const reports = contentPdf.split(/\n\s*\n/);
+
+    for (const report of reports) {
+      if (report != "") {
+        try {
+          qModel = await prompt.format({
+            text: report,
+          });
+          respondModel = await chain.call({ text: qModel });
+          console.log("llegue acá");
+          jsonOutputM = await JSON.parse(respondModel.text);
+          respondModelA.push(jsonOutputM);
+        } catch (err) {
+          console.log(
+            "Hubo un error al comunicarse con el modelo de OpenAI: " + err
+          );
+        }
+      }
+    }
+
+    res.render("demo2", {
+      pdfTitle: pdfTitle,
+      paciente: respondModelA,
+      consultPrev: consultPrev,
+    });
+  });
 //Inicialización del servidor
 app.listen(PORT, function () {
   console.log("Servidor corriendo en el puerto 3000");

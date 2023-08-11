@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>upload</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    <div class="containerG">
+        <h1>EY Assistant Proposal</h1>
+        <p>Este es un demo de Chat GPT para la extracción de información de documentos, hecha para EY Colombia</p>
+        <form action="/load" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <h6 style="margin-top: 10px;">Por favor carga tu archivo en PDF</h6>
+                <div class="input-group mb-3">
+                    <input type="file" class="form-control" name="loadFile" id="LoadFile" accept=".pdf">
+                    <label class="input-group-text" for="LoadFile">Añadir</label>
+                </div>
+            </div>
+            <div class="containerFlexButton">
+                <div>
+                    <button class="btn btn-primary" type="submit" name="sendFile">Cargar</button>
+                </div>
+            </div>
+        </form>
+</body>
+
+</html>
