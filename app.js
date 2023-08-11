@@ -104,6 +104,7 @@ const chain2 = new ConversationChain({ llm: model, memory: memory });*/
 let consultPrev = "";
 let respondModel = "";
 let jsonOutputM;
+let jsonArray = [];
 
 app.get("/", async function (req, res) {
   //const test = await chain.call({year:"2018"});
@@ -118,7 +119,45 @@ app.get("/", async function (req, res) {
 });
 
 app.get("/test", (req, res) => {
-  res.render("table");
+  const paciente = {
+    paciente: {
+      genero: "Femenino",
+      iniciales: "C",
+      edad: "18",
+      nacimiento: "2003-01-01",
+      altura: "160 cm",
+      peso: "60 kg",
+    },
+    descripcion: {
+      indicacion: "Dolor de cabeza",
+      medicacion: "Ninguna",
+      id: "col-1234",
+      medicamentos: ["Acetaminofen", "hiola", "aaaa"],
+      via: "Oral",
+      dosis: "500 mg",
+      sintomas: ["Dolor de cabeza", "Vómitos"],
+    },
+    producto: {
+      nombre: "",
+      lugar: "",
+    },
+    informante: {
+      tipo: "Paciente",
+      nombre: "Carolina Mesa",
+      pais: "Colombia",
+    },
+    fechas: {
+      notificacion: "2021-09-15",
+      actual: "2021-09-15",
+      uso: "2021-09-14",
+    },
+  };
+  jsonArray.push(paciente);
+  res.render("table", {
+    //paciente: jsonOutputM
+    paciente: jsonArray,
+    //paciente: paciente
+  });
 });
 
 app.post("/gpt", async function (req, res) {
@@ -134,6 +173,7 @@ app.post("/gpt", async function (req, res) {
   }
   //console.log(respondModel);
   jsonOutputM = await JSON.parse(respondModel.text);
+  jsonArray.push(jsonOutputM);
   /*console.log(
     "Los medicamentos son: " +
       jsonOutputM.medicamentos +
