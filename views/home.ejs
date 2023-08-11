@@ -17,12 +17,12 @@
             <textarea class="form-control" disabled="true" id="askModel" rows="10"><%= respondModel %></textarea>
         </div>
         <p>Reporte adverso consultado: <i><strong>
-                <%= consultPrev %>
-            </strong></i></p>
+                    <%= consultPrev %>
+                </strong></i></p>
         <form action="/gpt" method="post">
             <div class="form-group">
                 <label for="questionModel">Escriba la descripción del reporte adverso:</label>
-                <textarea class="form-control" id="questionModel" name="questionModel" rows="2"></textarea>
+                <textarea class="form-control" id="questionModel" name="questionModel" rows="5"></textarea>
             </div>
             <div class="containerFlexButton">
                 <div>

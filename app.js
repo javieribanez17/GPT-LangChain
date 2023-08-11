@@ -27,19 +27,24 @@ const PORT = process.env.PORT || 5000;
 const parser = StructuredOutputParser.fromZodSchema(
   z.object({
     paciente: z.object({
-      genero: z.string().describe("Genero del paciente"),
-      iniciales: z
+      triage: z
         .string()
-        .describe("Letras iniciales del nombre del paciente"),
+        .describe(
+          "Si el paciente esta en peligro de muerte:{Critico}\nSi requiere hospitalización:{Urgente}\nSi no es ni Critico ni urgente:{General}"
+        ),
+      nombre: z.string().describe("Nombre del paciente"),
+      genero: z.string().describe("¿El paciente es hombre o mujer?"),
       edad: z.string().describe("Edad del paciente al presentar la queja"),
       nacimiento: z.string().describe("Fecha de nacimiento"),
-      altura: z.string().describe("Estatura del paciente"),
-      peso: z.string().describe("Peso del paciente"),
+      altura: z.string().describe("Estatura"),
+      peso: z.string().describe("Peso"),
     }),
     descripcion: z.object({
-      indicacion: z.string().describe("Indicación del paciente"),
-      medicacion: z.string().describe("Medicación previa del paciente"),
-      id: z.string().describe("ID del paciente"),
+      indicacion: z.string().describe("Indicación médica del paciente"),
+      medicacion: z
+        .array(z.string())
+        .describe("Medicación previa del paciente"),
+      id: z.string().describe("¿Cuál es el Patient ID?"),
       medicamentos: z
         .array(z.string())
         .describe("Medicamentos consumidos por el paciente"),
@@ -48,35 +53,36 @@ const parser = StructuredOutputParser.fromZodSchema(
       sintomas: z.array(z.string()).describe("Sintomas del paciente"),
     }),
     producto: z.object({
-      nombre: z.string().describe("Nombre dle producto"),
-      lugar: z.string().describe("Donde fue comprado el prodcuto"),
+      nombre: z.string().describe("Nombre del producto sospechoso"),
+      lugar: z.string().describe("Dónde fue comprado el prodcuto"),
     }),
     informante: z.object({
-      tipo: z.string().describe("Tipo de informante que realizó el reporte"),
+      tipo: z
+        .string()
+        .describe("Relación de quien hace el reporte con el paciente"),
       nombre: z.string().describe("Nombre del informante"),
       pais: z.string().describe("País desde donde reporta"),
     }),
     fechas: z.object({
-      notificacion: z
-        .string()
-        .describe("Fecha de la primera notificación o reporte"),
-      actual: z.string().describe("Fecha actual del reporte"),
+      notificacion: z.string().describe("¿Cuando realizó el primer reporte?"),
+      actual: z.string().describe("Fecha del reporte actual"),
       uso: z
         .string()
-        .describe("Cuando empezó el paciente a consumir el medicamento"),
+        .describe("¿Cuando empezó el paciente a consumir el medicamento?"),
     }),
   })
 );
 const formatInstructions = parser.getFormatInstructions();
 const prompt = new PromptTemplate({
-  template: "Extrae la información del reporte: {text}\n{format_instructions}",
+  template:
+    "Extrae y clasifica la siguiente información:\n{format_instructions}\nA partir del texto:\n{text}\nSi no encuentras algunos datos dentro del texto deja su valor vacío excepto en 'triage'",
   inputVariables: ["text"],
   partialVariables: { format_instructions: formatInstructions },
 });
 const model = new OpenAI({
   modelName: "gpt-3.5-turbo",
   openAIApiKey: process.env.OPEN_AI_KEY,
-  temperature: 0.2,
+  temperature: 0,
 });
 const chain = new LLMChain({
   llm: model,
@@ -126,7 +132,7 @@ app.post("/gpt", async function (req, res) {
   } catch (err) {
     console.log("Hubo un error al comunicarse con el modelo de OpenAI: " + err);
   }
-  console.log(respondModel);
+  //console.log(respondModel);
   jsonOutputM = await JSON.parse(respondModel.text);
   /*console.log(
     "Los medicamentos son: " +
