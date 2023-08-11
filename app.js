@@ -75,7 +75,7 @@ const prompt = new PromptTemplate({
 });
 const model = new OpenAI({
   modelName: "gpt-3.5-turbo",
-  openAIApiKey: process.env.OPEN_AI_KEY || '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',
+  openAIApiKey: process.env.OPEN_AI_KEY,
   temperature: 0.2,
 });
 const chain = new LLMChain({
