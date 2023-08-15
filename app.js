@@ -3,10 +3,13 @@ const express = require("express");
 const ejs = require("ejs");
 const app = express();
 const bodyParser = require("body-parser");
+const _ = require("lodash");
 //Demo 2
 const multer = require("multer");
 const fs = require("fs");
 const pdf = require("pdf-parse");
+//Demo 3
+const superagent = require("superagent");
 //Declaraciones necesarias
 require("dotenv").config();
 app.set("view engine", "ejs");
@@ -18,26 +21,13 @@ const { PromptTemplate } = require("langchain/prompts");
 const { LLMChain } = require("langchain/chains");
 const { StructuredOutputParser } = require("langchain/output_parsers");
 const { z } = require("zod");
-//Paquetes de LangChain para Embeddings
-/*const { BufferMemory } = require("langchain/memory");
-const { ConversationChain } = require("langchain/chains");*/
 //Variables de entorno
 const PORT = process.env.PORT || 5000;
 //------------------------------------- Modelo para Janssen -------------------------------------
-// const parser = StructuredOutputParser.fromNamesAndDescriptions({
-//   medicamentos: "Medicamentos consumidos por el paciente separados ','",
-//   sintomas: "Sintomas que tiene el paciente separados por ','",
-// });
 const parser = StructuredOutputParser.fromZodSchema(
   z.object({
     paciente: z.object({
-      triage: z
-        .string()
-        .describe(
-          "Si el paciente esta en peligro de muerte:{Critico}\nSi requiere hospitalización:{Urgente}\nSi no es ni Critico ni urgente:{General}"
-        ),
       nombre: z.string().describe("Nombre del paciente"),
-      genero: z.string().describe("¿El paciente es hombre o mujer?"),
       edad: z.string().describe("Edad del paciente al presentar la queja"),
       nacimiento: z.string().describe("Fecha de nacimiento"),
       altura: z.string().describe("Estatura"),
@@ -48,23 +38,22 @@ const parser = StructuredOutputParser.fromZodSchema(
       medicacion: z
         .array(z.string())
         .describe("Medicación previa del paciente"),
-      id: z.string().describe("¿Cuál es el Patient ID?"),
+      id: z.string().describe("Extrae el PSP Patient ID del texto"),
       medicamentos: z
         .array(z.string())
         .describe("Medicamentos consumidos por el paciente"),
       via: z.string().describe("Vía de administración del medicamento"),
       dosis: z.string().describe("Dosis del medicamento consumida"),
-      sintomas: z.array(z.string()).describe("Sintomas del paciente"),
+      sintomas: z
+        .array(z.string())
+        .describe("Dime cada uno de los sintomas del paciente"),
     }),
     producto: z.object({
-      nombre: z.string().describe("Nombre del producto sospechoso"),
+      nombreP: z.string().describe("Nombre del producto sospechoso"),
       lugar: z.string().describe("Dónde fue comprado el prodcuto"),
     }),
     informante: z.object({
-      tipo: z
-        .string()
-        .describe("Relación de quien hace el reporte con el paciente"),
-      nombre: z.string().describe("Nombre del informante"),
+      nombreI: z.string().describe("Nombre del informante"),
       pais: z.string().describe("País desde donde reporta"),
     }),
     fechas: z.object({
@@ -79,7 +68,8 @@ const parser = StructuredOutputParser.fromZodSchema(
 const formatInstructions = parser.getFormatInstructions();
 const prompt = new PromptTemplate({
   template:
-    "Extrae y clasifica la siguiente información:\n{format_instructions}\nA partir del texto:\n{text}\nSi no encuentras algunos datos dentro del texto deja su valor vacío excepto en 'triage'",
+    "Extrae y determina la siguiente información:\n{format_instructions}\nDel texto:\n{text}\n" +
+    "Ten en cuenta que sino puedes extraer algún dato del texto debes dejar su valor vacío",
   inputVariables: ["text"],
   partialVariables: { format_instructions: formatInstructions },
 });
@@ -101,52 +91,45 @@ const storage = multer.diskStorage({
     cb(null, file.originalname); // Usa el nombre original del archivo
   },
 });
+//Variables
 const upload = multer({ storage });
 let respondModelA = [];
 let qModel = "";
 let pdfTitle = "";
-//--------------------------------------------------------------------------
-//Certificado deshabilitado
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-//------------------------------------- Modelo para Embeddings -------------------------------------
-
-//chatbot example
-/*const model2 = new OpenAI({
-    openAIApiKey: process.env.OPEN_AI_KEY,
-});
-const memory = new BufferMemory();
-const chain2 = new ConversationChain({ llm: model, memory: memory });*/
-//Llamando al home del servidor
-//Variables
 let consultPrev = "";
 let respondModel = "";
 let jsonOutputM;
 let jsonArray = [];
-
+//--------------------------------------------------------------------------
+//Certificado deshabilitado
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+//------------------------------------- Servidor -------------------------------------
+function upperProps(object) {
+  object.descripcion.medicamentos = _.map(
+    object.descripcion.medicamentos,
+    (medicamento) => _.upperCase(medicamento)
+  );
+  object.descripcion.sintomas = _.map(object.descripcion.sintomas, (sintoma) =>
+    _.upperCase(sintoma)
+  );
+  return object;
+}
+//Llamando al home del servidor
 app.get("/", async function (req, res) {
-  //const test = await chain.call({year:"2018"});
-  /*const test1 = await chain2.call({ input: "Hola, soy Javier Ibáñez" });
-    console.log(test1);
-    const test2 = await chain2.call({ input: "Cómo me llamo?" });
-    console.log(test2);*/
   res.render("home");
-  // res.render("demo1", {
-  //   respondModel: respondModel.text,
-  //   consultPrev: consultPrev,
-  // });
 });
-
+//Llamando al demo 1
 app.get("/demo1", (req, res) => {
   res.render("demo1", {
     respondModel: respondModel.text,
     consultPrev: consultPrev,
   });
 });
-
+//Llamando al demo 2
 app.get("/demo2", (req, res) => {
   res.render("upload");
 });
-
+//Respuesta del demo 1
 app.post("/gpt", async function (req, res) {
   consultPrev = req.body.questionModel;
   let qModel = "";
@@ -158,16 +141,18 @@ app.post("/gpt", async function (req, res) {
   } catch (err) {
     console.log("Hubo un error al comunicarse con el modelo de OpenAI: " + err);
   }
-  //console.log(respondModel);
-  jsonOutputM = await JSON.parse(respondModel.text);
+  jsonOutputM = upperProps(await JSON.parse(respondModel.text));
   jsonArray.push(jsonOutputM);
-  /*console.log(
-    "Los medicamentos son: " +
-      jsonOutputM.medicamentos +
-      " y los sintomas son: " +
-      jsonOutputM.sintomas
-  );*/
+  //Redirect same page
   res.redirect("/demo1");
+  //Envío de datos por HTTPS
+  superagent
+    .post(process.env.HTTPS_SERVER)
+    .send(jsonArray)
+    .then(console.log("Envío realizado"))
+    .catch(console.error);
+
+  jsonArray = [];
 });
 //Página con archivo de carga
 app
@@ -179,11 +164,11 @@ app
     res.render("upload");
   });
 
-//Attach file
+//Respuesta a la carga del archivo
 app
   .route("/load")
   .get((req, res) => {
-    res.render("home2", {
+    res.render("demo2", {
       pdfTitle: pdfTitle,
       paciente: respondModelA,
       consultPrev: consultPrev,
@@ -202,7 +187,7 @@ app
       //res.send(contentPdf);
     });
     const reports = contentPdf.split(/\n\s*\n/);
-
+    //Llamdo al modelo de IA
     for (const report of reports) {
       if (report != "") {
         try {
@@ -210,8 +195,7 @@ app
             text: report,
           });
           respondModel = await chain.call({ text: qModel });
-          console.log("llegue acá");
-          jsonOutputM = await JSON.parse(respondModel.text);
+          jsonOutputM = upperProps(await JSON.parse(respondModel.text));
           respondModelA.push(jsonOutputM);
         } catch (err) {
           console.log(
@@ -220,13 +204,27 @@ app
         }
       }
     }
-
+    //Envío de datos por HTTPS
+    superagent
+      .post(process.env.HTTPS_SERVER)
+      .send(respondModelA)
+      .then(console.log("Envío realizado"))
+      .catch(console.error);
+    //Renderiza la tabla con los datos
     res.render("demo2", {
       pdfTitle: pdfTitle,
       paciente: respondModelA,
       consultPrev: consultPrev,
     });
   });
+//Route for excel and Power BI
+app.get("/test", (req, res) => {
+  res.render("demoTest", {
+    pdfTitle: pdfTitle,
+    paciente: respondModelA,
+    consultPrev: consultPrev,
+  });
+});
 //Inicialización del servidor
 app.listen(PORT, function () {
   console.log("Servidor corriendo en el puerto 3000");

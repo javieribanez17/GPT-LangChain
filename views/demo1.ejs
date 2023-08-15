@@ -11,17 +11,17 @@
 
 <body>
     <div class="containerG">
-        <h1>Consultas de reportes de afectación</h1>
+        <h1>Reporte de efectos adversos</h1>
         <div class="form-group">
             <label for="askModel">Respuesta del modelo GPT:</label>
             <textarea class="form-control" disabled="true" id="askModel" rows="10"><%= respondModel %></textarea>
         </div>
-        <p>Reporte adverso consultado: <i><strong>
+        <p>Reporte de efecto adverso consultado: <i><strong>
                     <%= consultPrev %>
                 </strong></i></p>
         <form action="/gpt" method="post">
             <div class="form-group">
-                <label for="questionModel">Escriba la descripción del reporte adverso:</label>
+                <label for="questionModel">Escriba la descripción del reporte de efecto adverso:</label>
                 <textarea class="form-control" id="questionModel" name="questionModel" rows="5"></textarea>
             </div>
             <div class="containerFlexButton">
