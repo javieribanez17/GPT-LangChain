@@ -1,18 +1,39 @@
 .containerG {
   width: 80%;
-  height: 100vh;
   margin-left: 10%;
   margin-top: 50px;
+  padding-bottom: 50px;
 }
+
+#carrusel{
+  text-align: center;
+  background-color: #8bd3f8;
+  margin-bottom: 3%;
+}
+
+#carouselExampleControls{
+  width: 60%;
+  margin: 0 auto;
+}
+
+.containerFlexButton{
+  margin-bottom: 10%;
+  text-align: center;
+}
+
+#buttons {
+  width: 80%;
+  display: flex;
+  justify-content: space-around;
+  margin: 0 auto;
+}
+
 .containerTable {
   width: 100%;
   overflow: auto;
   height: 33vh;
 }
-.containerFlexButton {
-  display: flex;
-  justify-content: center;
-}
+
 .btn-primary {
   margin-top: 10px;
 }
@@ -36,3 +57,123 @@
   font-weight: bold;
   text-align: center;
 }
+
+.btn-redirect{
+  background-color: #FFFFFF;
+  border-radius: 40em;
+  border-style: none;
+  box-shadow: #039ddc 0 -12px 6px inset;
+  box-sizing: border-box;
+  color: #000000;
+  cursor: pointer;
+  display: inline-block;
+  font-weight: 600;
+  font-size: 30px;
+  outline: none;
+  padding: 1rem 1.3rem;
+  text-align: center;
+  text-decoration: none;
+  transition: all .15s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.btn-redirect:hover {
+  background-color: #8bd3f8;
+  box-shadow: #003479 0 -6px 8px inset;
+  transform: scale(1.125);
+}
+
+.btn-redirect:active {
+  transform: scale(1.025);
+}
+
+#general{
+  padding-top: 60px; 
+  display: flex;
+  position: relative;
+  min-height: 100vh;
+}
+
+
+#footer {
+  position: absolute;
+  bottom: 0;
+  background-color: #333;
+  color: white;
+  text-align: center;
+}
+
+#header {
+  width: 100%;
+  justify-content: space-between;
+  display: flex;
+  position: fixed;
+  background-color: #333;
+  color: white;
+  text-align: center;
+  z-index: 1000;
+}
+
+
+
+.btn-header{
+  width: 15%;
+  height: 15%;
+  border: none;
+  background-color: #333;
+}
+
+#ele-first{
+  width: 25%;
+  height: 25%;
+  text-align: left;
+}
+
+.input-group{
+  margin-bottom: 3%;
+}
+
+
+#ele-third{
+  width: 25%;
+  height: 25%;
+}
+
+
+#btn2{
+  width: 15%;
+  height: 15%;
+}
+
+
+#loaderContainer {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+#loader {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 2s linear infinite;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
