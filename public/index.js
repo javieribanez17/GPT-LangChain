@@ -16,4 +16,8 @@ if(document.getElementById("btn-upload")){
     uploadFile.addEventListener("change", ()=>{
         btnFile.disabled = uploadFile.files.length === 0;
     })
+    btnFile.addEventListener("click", function(){
+        var container = document.getElementById("loaderContainer");
+        container.style.display = "block"
+    })
 }
