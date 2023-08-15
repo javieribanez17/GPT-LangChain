@@ -1,18 +1,39 @@
 .containerG {
   width: 80%;
-  height: 100vh;
   margin-left: 10%;
   margin-top: 50px;
+  padding-bottom: 50px;
 }
+
+#carrusel{
+  text-align: center;
+  background-color: #8bd3f8;
+  margin-bottom: 3%;
+}
+
+#carouselExampleControls{
+  width: 60%;
+  margin: 0 auto;
+}
+
+.containerFlexButton{
+  margin-bottom: 15%;
+  text-align: center;
+}
+
+#buttons {
+  width: 80%;
+  display: flex;
+  justify-content: space-around;
+  margin: 0 auto;
+}
+
 .containerTable {
   width: 100%;
   overflow: auto;
   height: 33vh;
 }
-.containerFlexButton {
-  display: flex;
-  justify-content: center;
-}
+
 .btn-primary {
   margin-top: 10px;
 }
@@ -35,4 +56,54 @@
 #head {
   font-weight: bold;
   text-align: center;
+}
+
+.btn-redirect{
+  background-color: #FFFFFF;
+  border-radius: 40em;
+  border-style: none;
+  box-shadow: #039ddc 0 -12px 6px inset;
+  box-sizing: border-box;
+  color: #000000;
+  cursor: pointer;
+  display: inline-block;
+  font-weight: 600;
+  font-size: 30px;
+  outline: none;
+  padding: 1rem 1.3rem;
+  text-align: center;
+  text-decoration: none;
+  transition: all .15s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.btn-redirect:hover {
+  background-color: #8bd3f8;
+  box-shadow: #003479 0 -6px 8px inset;
+  transform: scale(1.125);
+}
+
+.btn-redirect:active {
+  transform: scale(1.025);
+}
+
+body{
+  position: relative;
+  min-height: 100vh;
+}
+
+
+#footer {
+  position: absolute;
+  bottom: 0;
+  background-color: #333;
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
+
+.input-group{
+  margin-bottom: 3%;
 }
