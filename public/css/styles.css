@@ -17,7 +17,7 @@
 }
 
 .containerFlexButton{
-  margin-bottom: 15%;
+  margin-bottom: 10%;
   text-align: center;
 }
 
@@ -90,6 +90,7 @@
 }
 
 body{
+  display: flex;
   position: relative;
   min-height: 100vh;
 }
@@ -101,9 +102,39 @@ body{
   background-color: #333;
   color: white;
   text-align: center;
-  padding: 20px;
 }
 
 .input-group{
   margin-bottom: 3%;
+}
+
+
+
+#loaderContainer {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+#loader {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 2s linear infinite;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
