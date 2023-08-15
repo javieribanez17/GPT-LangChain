@@ -11,37 +11,39 @@
 </head>
 
 <body>
-    <div id="loaderContainer">
-        <div id="loader"></div>
-    </div>
-    <div class="containerG">
-        <h1>EY Assistant Proposal</h1>
-        <p>Este es un demo de Chat GPT para la extracción de información de documentos, hecha para EY Colombia</p>
-        <form action="/load" method="post" enctype="multipart/form-data">
-            <div class="form-group">
-                <h6 style="margin-top: 10px;">Por favor carga tu archivo en PDF</h6>
-                <div class="input-group mb-3">
-                    <input type="file" class="form-control" name="loadFile" id="LoadFile" accept=".pdf">
-                    <label class="input-group-text" for="LoadFile">Añadir</label>
+    <div id="general">
+        <div id="loaderContainer">
+            <div id="loader"></div>
+        </div>
+        <div class="containerG">
+            <h1>EY Assistant Proposal</h1>
+            <p>Este es un demo de Chat GPT para la extracción de información de documentos, hecha para EY Colombia</p>
+            <form action="/load" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <h6 style="margin-top: 10px;">Por favor carga tu archivo en PDF</h6>
+                    <div class="input-group mb-3">
+                        <input type="file" class="form-control" name="loadFile" id="LoadFile" accept=".pdf">
+                        <label class="input-group-text" for="LoadFile">Añadir</label>
+                    </div>
                 </div>
-            </div>
-            <div class="containerFlexButton">
-                <div>
-                    <button id="btn-upload" class="btn btn-primary" type="submit" name="sendFile" disabled>Cargar</button>
+                <div class="containerFlexButton">
+                    <div>
+                        <button id="btn-upload" class="btn btn-primary" type="submit" name="sendFile" disabled>Cargar</button>
+                    </div>
                 </div>
-            </div>
-        </form>
-    </div>
-    <div id="footer">
-        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, 
-            sed diam nonummy nibh euismod tincidunt ut laoreet dolore 
-            magna aliquam erat volutpat. Ut wisi enim ad minim veniam, 
-            quis nostrud exerci tation ullamcorper suscipit lobortis nisl 
-            ut aliquip ex ea commodo consequat. Duis autem vel eum iriure 
-            dolor in hendrerit in vulputate velit esse molestie consequat, 
-            vel illum dolore eu feugiat nulla facilisis at vero eros et 
-            accumsan et iusto odio dignissim qui blandit praesent luptatum 
-            zzril delenit augue duis dolore te feugait nulla facilisi.</p>            
+            </form>
+        </div>
+        <div id="footer">
+            <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, 
+                sed diam nonummy nibh euismod tincidunt ut laoreet dolore 
+                magna aliquam erat volutpat. Ut wisi enim ad minim veniam, 
+                quis nostrud exerci tation ullamcorper suscipit lobortis nisl 
+                ut aliquip ex ea commodo consequat. Duis autem vel eum iriure 
+                dolor in hendrerit in vulputate velit esse molestie consequat, 
+                vel illum dolore eu feugiat nulla facilisis at vero eros et 
+                accumsan et iusto odio dignissim qui blandit praesent luptatum 
+                zzril delenit augue duis dolore te feugait nulla facilisi.</p>            
+        </div>
     </div>
 </body>
 <script src="./index.js"></script>

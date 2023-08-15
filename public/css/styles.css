@@ -89,7 +89,8 @@
   transform: scale(1.025);
 }
 
-body{
+#general{
+  padding-top: 60px; 
   display: flex;
   position: relative;
   min-height: 100vh;
@@ -104,10 +105,47 @@ body{
   text-align: center;
 }
 
+#header {
+  width: 100%;
+  justify-content: space-between;
+  display: flex;
+  position: fixed;
+  background-color: #333;
+  color: white;
+  text-align: center;
+  z-index: 1000;
+}
+
+
+
+.btn-header{
+  width: 15%;
+  height: 15%;
+  border: none;
+  background-color: #333;
+}
+
+#ele-first{
+  width: 25%;
+  height: 25%;
+  text-align: left;
+}
+
 .input-group{
   margin-bottom: 3%;
 }
 
+
+#ele-third{
+  width: 25%;
+  height: 25%;
+}
+
+
+#btn2{
+  width: 15%;
+  height: 15%;
+}
 
 
 #loaderContainer {
@@ -138,3 +176,4 @@ body{
   0% { transform: translate(-50%, -50%) rotate(0deg); }
   100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
+
