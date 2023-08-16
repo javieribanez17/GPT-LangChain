@@ -21,42 +21,47 @@ const { OpenAI } = require("langchain/llms/openai");
 const { PromptTemplate } = require("langchain/prompts");
 const { LLMChain } = require("langchain/chains");
 const { StructuredOutputParser } = require("langchain/output_parsers");
-const { z } = require("zod");
+const { z, object } = require("zod");
 //Variables de entorno
 const PORT = process.env.PORT || 5000;
 //------------------------------------- Modelo para Janssen -------------------------------------
 const parser = StructuredOutputParser.fromZodSchema(
   z.object({
     //paciente
-    nombre: z.string().describe("Nombre del paciente"),
+    numero_paciente: z.string().describe("Extrae el PSP Patient ID del texto"),
+    iniciales: z
+      .string()
+      .describe("Cuáles son las iniciales del nombre del paciente"),
+    genero: z.string().describe("Dime el género sexual del paciente"),
     edad: z.string().describe("Edad del paciente al presentar la queja"),
-    nacimiento: z.string().describe("Fecha de nacimiento"),
     altura: z.string().describe("Estatura"),
     peso: z.string().describe("Peso"),
-    //descripcion
     indicacion: z.string().describe("Indicación médica del paciente"),
-    medicacion: z.array(z.string()).describe("Medicación previa del paciente"),
-    id: z.string().describe("Extrae el PSP Patient ID del texto"),
-    medicamentos: z
-      .array(z.string())
-      .describe("Medicamentos consumidos por el paciente"),
-    via: z.string().describe("Vía de administración del medicamento"),
+    fecha_nacimiento: z.string().describe("Fecha de nacimiento"),
+    nombre_product: z.string().describe("Nombre del producto sospechoso"),
     dosis: z.string().describe("Dosis del medicamento consumida"),
+    via_de_admi: z.string().describe("Vía de administración del medicamento"),
+    comprado_en: z.string().describe("Dónde fue comprado el prodcuto"),
+    prod_concomitante: z
+      .array(z.string())
+      .describe("productos concomitantes consumidos por el paciente"),
+    informante: z.string().describe("Relación del informante con el paciente"),
+    nombre: z.string().describe("Nombre del informante"),
+    apellido: z.string().describe("Apellido del informante"),
+    pais: z.string().describe("País desde donde reporta"),
+    permiso: z.string().describe("¿Hay autorización para contactar?"),
+    ini_product: z
+      .string()
+      .describe("¿Cuando empezó el paciente a consumir el medicamento?"),
+    notificacion1: z.string().describe("¿Cuando realizó el primer reporte?"),
+    //descripcion
+    medicacion: z.array(z.string()).describe("Medicación previa del paciente"),
+    // medicamentos: z
+    //   .array(z.string())
+    //   .describe("Medicamentos consumidos por el paciente"),
     sintomas: z
       .array(z.string())
       .describe("Dime cada uno de los sintomas del paciente"),
-    //producto
-    nombreP: z.string().describe("Nombre del producto sospechoso"),
-    lugar: z.string().describe("Dónde fue comprado el prodcuto"),
-    //informante
-    nombreI: z.string().describe("Nombre del informante"),
-    pais: z.string().describe("País desde donde reporta"),
-    //fehcas
-    notificacion: z.string().describe("¿Cuando realizó el primer reporte?"),
-    actual: z.string().describe("Fecha del reporte actual"),
-    uso: z
-      .string()
-      .describe("¿Cuando empezó el paciente a consumir el medicamento?"),
   })
 );
 const formatInstructions = parser.getFormatInstructions();
@@ -94,6 +99,32 @@ let consultPrev = "";
 let respondModel = "";
 let jsonOutputM;
 let jsonArray = [];
+let resultQuery;
+let nullArrayParams = [];
+const parametrs = [
+  "id",
+  "numero_paciente",
+  "iniciales",
+  "genero",
+  "edad",
+  "altura",
+  "peso",
+  "indicacion",
+  "fecha_nacimiento",
+  "nombre_product",
+  "dosis",
+  "via_de_admi",
+  "comprado_en",
+  "prod_concomitante",
+  "informante",
+  "nombre",
+  "apellido",
+  "pais",
+  "permiso",
+  "descripcion",
+  "ini_product",
+  "notificacion1",
+];
 //--------------------------------------------------------------------------
 //Certificado deshabilitado
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -119,8 +150,7 @@ try {
 } catch (err) {
   console.log(err);
 }
-
-//------------------------------------- Servidor -------------------------------------
+//Funciones de limpieza
 function upperProps(object) {
   object.descripcion.medicamentos = _.map(
     object.descripcion.medicamentos,
@@ -131,6 +161,25 @@ function upperProps(object) {
   );
   return object;
 }
+function fineResultQuery(arrayResutl) {
+  arrayResutl.forEach((object) => {
+    object.genero = _.upperCase(object.genero);
+    object.prod_concomitante = object.prod_concomitante.split(", ");
+    object.prod_concomitante = _.map(object.prod_concomitante, (product) =>
+      _.upperCase(product)
+    );
+  });
+  return arrayResutl;
+}
+function dataNullArray(arrayQuery) {
+  nullArrayParams = [];
+  parametrs.forEach((param) => {
+    if (arrayQuery[0][param] == null) {
+      nullArrayParams.push(param);
+    }
+  });
+}
+//------------------------------------- Servidor -------------------------------------
 //Llamando al home del servidor
 app.get("/", async function (req, res) {
   res.render("home");
@@ -148,18 +197,31 @@ app.get("/demo2", (req, res) => {
 });
 //Llamado al demo 3
 app.get("/demo3", async (req, res) => {
+  res.render("demo3", {
+    resultQuery: JSON.stringify(resultQuery),
+  });
+});
+//Respuesta al demo3
+app.post("/demo3-search", async (req, res) => {
+  let qModel = "";
+  let numCase = req.body.numCase;
+  let orderColumns =
+    "id, numero_paciente, iniciales, genero, edad, altura, peso, " +
+    "indicacion, fecha_nacimiento, nombre_product, dosis, via_de_admi, comprado_en, " +
+    "prod_concomitante, informante, nombre, apellido, pais, permiso, descripcion, ini_product, notificacion1";
   // Abrir la conexión
-  let resultQuery = [];
   await pool
     .connect()
     .then(() => {
       // Realizar consulta
-      const query = "SELECT * FROM triage WHERE id = 1";
+      const query = `SELECT ${orderColumns} FROM triage WHERE id = ${numCase}`;
       return pool.request().query(query);
     })
     .then((result) => {
       // Procesar resultado de la consulta
       resultQuery = result.recordset;
+      dataNullArray(resultQuery);
+      fineResultQuery(resultQuery);
     })
     .catch((err) => {
       // Manejar errores
@@ -169,11 +231,18 @@ app.get("/demo3", async (req, res) => {
       // Cerrar la conexión
       pool.close();
     });
+  // try {
+  //   qModel = await prompt.format({
+  //     text: resultQuery[0].descripcion,
+  //   });
+  //   respondModel = await chain.call({ text: qModel });
+  // } catch (err) {
+  //   console.log("Hubo un error al comunicarse con el modelo de OpenAI: " + err);
+  // }
+  // jsonOutputM = await JSON.parse(respondModel.text); //upperProps(await JSON.parse(respondModel.text));
+  // jsonArray.push(jsonOutputM);
 
-  console.log(resultQuery);
-  res.render("demo3", {
-    resultQuery: resultQuery,
-  });
+  res.redirect("/demo3");
 });
 //Respuesta del demo 1
 app.post("/gpt", async function (req, res) {

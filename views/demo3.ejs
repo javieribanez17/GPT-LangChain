@@ -18,16 +18,19 @@
         <div id="general">
             <div class="containerG">
                 <div class="containerSearch">
-                    <div class="input-group mb-3">
-                        <form action="
-                        "></form>
-                        <input type="number" class="form-control" placeholder="Número del caso a consultar"
-                            aria-label="Recipient's username" aria-describedby="basic-addon2">
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" type="button">Button</button>
+                    <form action="/demo3-search" method="post">
+                        <div class="input-group mb-3">
+                            <input type="number" name="numCase" class="form-control" style="border-radius: 10px;"
+                                placeholder="Número del caso a consultar" aria-label="Recipient's username"
+                                aria-describedby="basic-addon2">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" style="margin-left: 5px;"
+                                    type="submit">Enviar</button>
+                            </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
+                <textarea class="form-control" disabled="true" rows="10"><%= resultQuery %></textarea>
             </div>
         </div>
         <%- include("partials/footer"); -%>
