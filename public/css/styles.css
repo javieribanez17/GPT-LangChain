@@ -1,22 +1,21 @@
 .containerG {
   width: 80%;
   margin-left: 10%;
-  margin-top: 50px;
   padding-bottom: 50px;
 }
 
-#carrusel{
+#carrusel {
   text-align: center;
   background-color: #8bd3f8;
   margin-bottom: 3%;
 }
 
-#carouselExampleControls{
+#carouselExampleControls {
   width: 60%;
   margin: 0 auto;
 }
 
-.containerFlexButton{
+.containerFlexButton {
   margin-bottom: 10%;
   text-align: center;
 }
@@ -58,8 +57,8 @@
   text-align: center;
 }
 
-.btn-redirect{
-  background-color: #FFFFFF;
+.btn-redirect {
+  background-color: #ffffff;
   border-radius: 40em;
   border-style: none;
   box-shadow: #039ddc 0 -12px 6px inset;
@@ -73,7 +72,7 @@
   padding: 1rem 1.3rem;
   text-align: center;
   text-decoration: none;
-  transition: all .15s;
+  transition: all 0.15s;
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
@@ -89,13 +88,12 @@
   transform: scale(1.025);
 }
 
-#general{
-  padding-top: 60px; 
+#general {
+  padding-top: 60px;
   display: flex;
   position: relative;
   min-height: 100vh;
 }
-
 
 #footer {
   position: absolute;
@@ -116,37 +114,32 @@
   z-index: 1000;
 }
 
-
-
-.btn-header{
+.btn-header {
   width: 15%;
   height: 15%;
   border: none;
   background-color: #333;
 }
 
-#ele-first{
+#ele-first {
   width: 25%;
   height: 25%;
   text-align: left;
 }
 
-.input-group{
+.input-group {
   margin-bottom: 3%;
 }
 
-
-#ele-third{
+#ele-third {
   width: 25%;
   height: 25%;
 }
 
-
-#btn2{
+#btn2 {
   width: 15%;
   height: 15%;
 }
-
 
 #loaderContainer {
   display: none;
@@ -173,7 +166,10 @@
 }
 
 @keyframes spin {
-  0% { transform: translate(-50%, -50%) rotate(0deg); }
-  100% { transform: translate(-50%, -50%) rotate(360deg); }
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }
-

@@ -1,55 +1,28 @@
-.container-card{
-    margin-top: 50px;
-    width: 80%;
-    margin-left: 10%;
+.container-card {
+  margin-top: 50px;
+  width: 80%;
+  margin-left: 10%;
 }
-.grid-container-card{
-    display: grid;
-    grid-template-columns: 0.75fr 0.5fr 1fr;
-    grid-template-rows: 2fr 1fr;
-    gap: 30px;
+.grid-container-card {
+  display: grid;
+  grid-template-columns: 0.75fr 0.5fr 1fr;
+  grid-template-rows: 2fr 1fr;
+  gap: 30px;
 }
-.card{
-    grid-column-start: 1;
-    grid-column-end: 2;
-    grid-row-start: 1;
-    grid-row-end: 3;
+.card {
+  grid-column-start: 1;
+  grid-column-end: 2;
+  grid-row-start: 1;
+  grid-row-end: 3;
 }
-.child-grid-semaforo{
-    grid-column-start: 2;
-    grid-column-end: 3;
-    grid-row-start: 1;
-    grid-row-end: 3;
+.child-grid {
+  min-width: 200px;
 }
-.child-grid{
-    min-width: 200px;
+.container-flex {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.containerFlex_semaforoText1{
-    display: flex;
-    height: 10%;
-    align-items: end;
-    justify-content: center;
-    color: black;
-}
-.containerFlex_semaforoText2{
-    display: flex;
-    height: 60%;
-    align-items: start;
-    justify-content: center;
-    color: black;
-}
-.containerFlex_semaforoImage{
-    display: flex;
-    height: 30%;
-    align-items: center;
-    justify-content: center;
-    max-height: 35%;
-}
-.container-flex{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.btn{
-    margin-top: 10px;
+.btn {
+  margin-top: 10px;
 }

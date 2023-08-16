@@ -10,6 +10,7 @@ const fs = require("fs");
 const pdf = require("pdf-parse");
 //Demo 3
 const superagent = require("superagent");
+const sql = require("mssql");
 //Declaraciones necesarias
 require("dotenv").config();
 app.set("view engine", "ejs");
@@ -26,43 +27,36 @@ const PORT = process.env.PORT || 5000;
 //------------------------------------- Modelo para Janssen -------------------------------------
 const parser = StructuredOutputParser.fromZodSchema(
   z.object({
-    paciente: z.object({
-      nombre: z.string().describe("Nombre del paciente"),
-      edad: z.string().describe("Edad del paciente al presentar la queja"),
-      nacimiento: z.string().describe("Fecha de nacimiento"),
-      altura: z.string().describe("Estatura"),
-      peso: z.string().describe("Peso"),
-    }),
-    descripcion: z.object({
-      indicacion: z.string().describe("Indicación médica del paciente"),
-      medicacion: z
-        .array(z.string())
-        .describe("Medicación previa del paciente"),
-      id: z.string().describe("Extrae el PSP Patient ID del texto"),
-      medicamentos: z
-        .array(z.string())
-        .describe("Medicamentos consumidos por el paciente"),
-      via: z.string().describe("Vía de administración del medicamento"),
-      dosis: z.string().describe("Dosis del medicamento consumida"),
-      sintomas: z
-        .array(z.string())
-        .describe("Dime cada uno de los sintomas del paciente"),
-    }),
-    producto: z.object({
-      nombreP: z.string().describe("Nombre del producto sospechoso"),
-      lugar: z.string().describe("Dónde fue comprado el prodcuto"),
-    }),
-    informante: z.object({
-      nombreI: z.string().describe("Nombre del informante"),
-      pais: z.string().describe("País desde donde reporta"),
-    }),
-    fechas: z.object({
-      notificacion: z.string().describe("¿Cuando realizó el primer reporte?"),
-      actual: z.string().describe("Fecha del reporte actual"),
-      uso: z
-        .string()
-        .describe("¿Cuando empezó el paciente a consumir el medicamento?"),
-    }),
+    //paciente
+    nombre: z.string().describe("Nombre del paciente"),
+    edad: z.string().describe("Edad del paciente al presentar la queja"),
+    nacimiento: z.string().describe("Fecha de nacimiento"),
+    altura: z.string().describe("Estatura"),
+    peso: z.string().describe("Peso"),
+    //descripcion
+    indicacion: z.string().describe("Indicación médica del paciente"),
+    medicacion: z.array(z.string()).describe("Medicación previa del paciente"),
+    id: z.string().describe("Extrae el PSP Patient ID del texto"),
+    medicamentos: z
+      .array(z.string())
+      .describe("Medicamentos consumidos por el paciente"),
+    via: z.string().describe("Vía de administración del medicamento"),
+    dosis: z.string().describe("Dosis del medicamento consumida"),
+    sintomas: z
+      .array(z.string())
+      .describe("Dime cada uno de los sintomas del paciente"),
+    //producto
+    nombreP: z.string().describe("Nombre del producto sospechoso"),
+    lugar: z.string().describe("Dónde fue comprado el prodcuto"),
+    //informante
+    nombreI: z.string().describe("Nombre del informante"),
+    pais: z.string().describe("País desde donde reporta"),
+    //fehcas
+    notificacion: z.string().describe("¿Cuando realizó el primer reporte?"),
+    actual: z.string().describe("Fecha del reporte actual"),
+    uso: z
+      .string()
+      .describe("¿Cuando empezó el paciente a consumir el medicamento?"),
   })
 );
 const formatInstructions = parser.getFormatInstructions();
@@ -103,6 +97,29 @@ let jsonArray = [];
 //--------------------------------------------------------------------------
 //Certificado deshabilitado
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+//Conexión a la base de datos
+const sqlConfig = {
+  user: process.env.DB_USER,
+  password: process.env.DB_PWD,
+  database: process.env.DB_NAME,
+  server: process.env.DB_SERVER,
+  pool: {
+    max: 10,
+    min: 0,
+    idleTimeoutMillis: 30000,
+  },
+  options: {
+    encrypt: true, // for azure
+    trustServerCertificate: false, // change to true for local dev / self-signed certs
+  },
+};
+let pool;
+try {
+  pool = new sql.ConnectionPool(sqlConfig);
+} catch (err) {
+  console.log(err);
+}
+
 //------------------------------------- Servidor -------------------------------------
 function upperProps(object) {
   object.descripcion.medicamentos = _.map(
@@ -129,6 +146,35 @@ app.get("/demo1", (req, res) => {
 app.get("/demo2", (req, res) => {
   res.render("upload");
 });
+//Llamado al demo 3
+app.get("/demo3", async (req, res) => {
+  // Abrir la conexión
+  let resultQuery = [];
+  await pool
+    .connect()
+    .then(() => {
+      // Realizar consulta
+      const query = "SELECT * FROM triage WHERE id = 1";
+      return pool.request().query(query);
+    })
+    .then((result) => {
+      // Procesar resultado de la consulta
+      resultQuery = result.recordset;
+    })
+    .catch((err) => {
+      // Manejar errores
+      console.error(err);
+    })
+    .finally(() => {
+      // Cerrar la conexión
+      pool.close();
+    });
+
+  console.log(resultQuery);
+  res.render("demo3", {
+    resultQuery: resultQuery,
+  });
+});
 //Respuesta del demo 1
 app.post("/gpt", async function (req, res) {
   consultPrev = req.body.questionModel;
@@ -141,7 +187,7 @@ app.post("/gpt", async function (req, res) {
   } catch (err) {
     console.log("Hubo un error al comunicarse con el modelo de OpenAI: " + err);
   }
-  jsonOutputM = upperProps(await JSON.parse(respondModel.text));
+  jsonOutputM = await JSON.parse(respondModel.text); //upperProps(await JSON.parse(respondModel.text));
   jsonArray.push(jsonOutputM);
   //Redirect same page
   res.redirect("/demo1");
