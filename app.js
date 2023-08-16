@@ -163,11 +163,15 @@ function upperProps(object) {
 }
 function fineResultQuery(arrayResutl) {
   arrayResutl.forEach((object) => {
-    object.genero = _.upperCase(object.genero);
-    object.prod_concomitante = object.prod_concomitante.split(", ");
-    object.prod_concomitante = _.map(object.prod_concomitante, (product) =>
-      _.upperCase(product)
-    );
+    // object.genero
+    //   ? (object.genero = _.upperCase(object.genero))
+    //   : object.genero;
+    if (object.prod_concomitante) {
+      object.prod_concomitante = object.prod_concomitante.split(", ");
+      object.prod_concomitante = _.map(object.prod_concomitante, (product) =>
+        _.upperCase(product)
+      );
+    }
   });
   return arrayResutl;
 }
@@ -199,11 +203,30 @@ app.get("/demo2", (req, res) => {
 app.get("/demo3", async (req, res) => {
   res.render("demo3", {
     resultQuery: JSON.stringify(resultQuery),
+    paciente: resultQuery,
+    respondModel: jsonArray,
   });
+});
+//Respuesta a petición del modelo
+app.get("/activeModel", async (req, res) => {
+  let qModel = "";
+  try {
+    qModel = await prompt.format({
+      text: resultQuery[0].descripcion,
+    });
+    respondModel = await chain.call({ text: qModel });
+  } catch (err) {
+    console.log("Hubo un error al comunicarse con el modelo de OpenAI: " + err);
+  }
+  const idd = { id: resultQuery[0].id };
+  jsonOutputM = await JSON.parse(respondModel.text); //upperProps(await JSON.parse(respondModel.text));
+  jsonOutputM = { ...idd, ...jsonOutputM };
+  jsonArray.push(jsonOutputM);
+  console.log(jsonArray);
+  res.redirect("/demo3");
 });
 //Respuesta al demo3
 app.post("/demo3-search", async (req, res) => {
-  let qModel = "";
   let numCase = req.body.numCase;
   let orderColumns =
     "id, numero_paciente, iniciales, genero, edad, altura, peso, " +

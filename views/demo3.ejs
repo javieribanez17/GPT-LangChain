@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="/css/styles.css">
     <link href="/css/card.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/demo3.css">
-
 </head>
 
 <body>
@@ -30,14 +29,92 @@
                         </div>
                     </form>
                 </div>
-                <textarea class="form-control" disabled="true" rows="10"><%= resultQuery %></textarea>
+                <div class="containerTable">
+                    <div class="horizontal-table">
+                        <% let First=true; %>
+                            <% for(jso in paciente) { %>
+                                <% if (First) { %>
+                                    <div id="head" class="horizontal-row">
+                                        <% for (const info in paciente[jso]) { %>
+                                            <div class="horizontal-cell">
+                                                <% if (info !="descripcion" ) { %>
+                                                    <%= info %>
+                                                        <% } %>
+                                            </div>
+                                            <% } %>
+                                    </div>
+                                    <% First=false; %>
+                                        <% } %>
+                                            <% } %>
+                                                <% for(jso in paciente) { %>
+                                                    <div class="horizontal-row">
+                                                        <% for (const info in paciente[jso]) { %>
+                                                            <div class="horizontal-cell">
+                                                                <% if (info !="descripcion" ) { %>
+                                                                    <%= paciente[jso][info] %>
+                                                                        <% } %>
+                                                            </div>
+                                                            <% } %>
+                                                    </div>
+                                                    <% } %>
+                    </div>
+                </div>
+                <% if (paciente) { %>
+                    <p>
+                        <strong>Descripción:</strong>
+                        <%= paciente[0].descripcion %>
+
+                    </p>
+                    <div class="containerFlexButton">
+                        <div>
+                            <form action="/activeModel" method="get">
+                                <input type="text" name="" id="" hidden>
+                                <button class="btn btn-primary" id="modelButton" type="submit"
+                                    name="sendRequest">Enviar</button>
+                            </form>
+                        </div>
+                    </div>
+                    <% } %>
+                        <% if (respondModel) { %>
+                            <div class="containerTable">
+                                <div class="horizontal-table">
+                                    <% let First=true; %>
+                                        <% for(jso in respondModel) { %>
+                                            <% if (First) { %>
+                                                <div id="head" class="horizontal-row">
+                                                    <% for (const info in respondModel[jso]) { %>
+                                                        <div class="horizontal-cell">
+                                                            <% if (info !="descripcion" ) { %>
+                                                                <%= info %>
+                                                                    <% } %>
+                                                        </div>
+                                                        <% } %>
+                                                </div>
+                                                <% First=false; %>
+                                                    <% } %>
+                                                        <% } %>
+                                                            <% for(jso in respondModel) { %>
+                                                                <div class="horizontal-row">
+                                                                    <% for (const info in respondModel[jso]) { %>
+                                                                        <div class="horizontal-cell">
+                                                                            <% if (info !="descripcion" ) { %>
+                                                                                <%= respondModel[jso][info] %>
+                                                                                    <% } %>
+                                                                        </div>
+                                                                        <% } %>
+                                                                </div>
+                                                                <% } %>
+                                </div>
+                            </div>
+                            <% } %>
             </div>
         </div>
-        <%- include("partials/footer"); -%>
+        </div>
 
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
-                integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
-                crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+            crossorigin="anonymous"></script>
 </body>
+<script src="/index.js"></script>
 
 </html>
