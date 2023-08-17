@@ -284,18 +284,36 @@ app.get("/activeModel", async (req, res) => {
   } catch (err) {
     console.log("Hubo un error al comunicarse con el modelo de OpenAI: " + err);
   }
+  const finalJson = resultQuery.map((obj) => ({ ...obj }));
   const idd = { id: resultQuery[0].id };
   jsonOutputM = await JSON.parse(respondModel.text); //await JSON.parse(respondModel.text);
   jsonOutputM = { ...idd, ...jsonOutputM };
   jsonArray.push(jsonOutputM);
-  mergeArrays(jsonArray);
-  //Envío de datos por HTTPS
+  // const finalJson = jsonArray.map(obj => ({...obj}));
 
+  finalJson.forEach((obj1) => {
+    const obj2 = findById(obj1.id);
+    if (obj2) {
+      for (const prop in obj1) {
+        if (obj1[prop] === null && obj2[prop] !== undefined) {
+          obj1[prop] = obj2[prop];
+        }
+      }
+      // var nuewKey = "medicacion"
+      // var newValue = obj2.medicacion
+      // obj1[nuewKey] = newValue
+      obj1["medicacion"] = obj2.medicacion;
+      obj1["sintomas"] = obj2.sintomas;
+    }
+  });
+
+  console.log(finalJson);
+  // console.log(jsonArray);
   res.redirect("/demo3");
 });
 
 function findById(id) {
-  return resultQuery.find((obj) => obj.id === id);
+  return jsonArray.find((obj) => obj.id === id);
 }
 
 //Respuesta al demo3
