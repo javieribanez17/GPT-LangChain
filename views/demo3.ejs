@@ -16,97 +16,108 @@
     <%- include("partials/navBar"); -%>
         <div id="general">
             <div class="containerG">
+                <br>
+                <h4>Escribe el número de caso</h4>
                 <div class="containerSearch">
                     <form action="/demo3-search" method="post">
                         <div class="input-group mb-3">
                             <input type="number" name="numCase" class="form-control" style="border-radius: 10px;"
-                                placeholder="Número del caso a consultar" aria-label="Recipient's username"
+                                placeholder="ej: '1', '2', '3'" aria-label="Recipient's username"
                                 aria-describedby="basic-addon2">
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary" style="margin-left: 5px;"
-                                    type="submit">Enviar</button>
+                                    type="submit">Consultar</button>
                             </div>
                         </div>
                     </form>
                 </div>
-                <div class="containerTable">
-                    <div class="horizontal-table">
-                        <% let First=true; %>
-                            <% for(jso in paciente) { %>
-                                <% if (First) { %>
-                                    <div id="head" class="horizontal-row">
-                                        <% for (const info in paciente[jso]) { %>
-                                            <div class="horizontal-cell">
-                                                <% if (info !="descripcion" ) { %>
-                                                    <%= info %>
-                                                        <% } %>
-                                            </div>
-                                            <% } %>
-                                    </div>
-                                    <% First=false; %>
-                                        <% } %>
-                                            <% } %>
-                                                <% for(jso in paciente) { %>
-                                                    <div class="horizontal-row">
-                                                        <% for (const info in paciente[jso]) { %>
-                                                            <div class="horizontal-cell">
-                                                                <% if (info !="descripcion" ) { %>
-                                                                    <%= paciente[jso][info] %>
-                                                                        <% } %>
-                                                            </div>
-                                                            <% } %>
-                                                    </div>
-                                                    <% } %>
-                    </div>
-                </div>
                 <% if (paciente) { %>
-                    <p>
-                        <strong>Descripción:</strong>
-                        <%= paciente[0].descripcion %>
-
-                    </p>
-                    <div class="containerFlexButton">
+                    <div class="containerFlexbtn">
+                        <div>
+                            <h5>Datos extraídos del modelo de inteligenica artificial:</h5>
+                        </div>
                         <div>
                             <form action="/activeModel" method="get">
                                 <input type="text" name="" id="" hidden>
-                                <button class="btn btn-primary" id="modelButton" type="submit"
-                                    name="sendRequest">Enviar</button>
+                                <button style="margin-bottom: 10px;" class="btn btn-primary" id="modelButton"
+                                    type="submit" name="sendRequest">Analizar</button>
                             </form>
                         </div>
                     </div>
-                    <% } %>
-                        <% if (respondModel) { %>
-                            <div class="containerTable">
-                                <div class="horizontal-table">
-                                    <% let First=true; %>
-                                        <% for(jso in respondModel) { %>
-                                            <% if (First) { %>
-                                                <div id="head" class="horizontal-row">
-                                                    <% for (const info in respondModel[jso]) { %>
-                                                        <div class="horizontal-cell">
-                                                            <% if (info !="descripcion" ) { %>
-                                                                <%= info %>
-                                                                    <% } %>
-                                                        </div>
-                                                        <% } %>
+
+                    <div class="containerTable">
+                        <div class="horizontal-table">
+                            <% let First=true; %>
+                                <% for(jso in paciente) { %>
+                                    <% if (First) { %>
+                                        <div id="head" class="horizontal-row">
+                                            <% for (const info in paciente[jso]) { %>
+                                                <div class="horizontal-cell">
+                                                    <% if (info !="descripcion" ) { %>
+                                                        <%= info %>
+                                                            <% } %>
                                                 </div>
-                                                <% First=false; %>
-                                                    <% } %>
-                                                        <% } %>
-                                                            <% for(jso in respondModel) { %>
-                                                                <div class="horizontal-row">
-                                                                    <% for (const info in respondModel[jso]) { %>
-                                                                        <div class="horizontal-cell">
-                                                                            <% if (info !="descripcion" ) { %>
-                                                                                <%= respondModel[jso][info] %>
-                                                                                    <% } %>
-                                                                        </div>
-                                                                        <% } %>
+                                                <% } %>
+                                        </div>
+                                        <% First=false; %>
+                                            <% } %>
+                                                <% } %>
+                                                    <% for(jso in paciente) { %>
+                                                        <div class="horizontal-row">
+                                                            <% for (const info in paciente[jso]) { %>
+                                                                <div class="horizontal-cell">
+                                                                    <% if (info !="descripcion" ) { %>
+                                                                        <%= paciente[jso][info] %>
+                                                                            <% } %>
                                                                 </div>
                                                                 <% } %>
-                                </div>
-                            </div>
+                                                        </div>
+                                                        <% } %>
+                        </div>
+                    </div>
+                    <% } %>
+                        <% if (paciente) { %>
+                            <br>
+                            <p>
+                                <strong>Descripción:</strong>
+                                <%= paciente[0].descripcion %>
+
+                            </p>
                             <% } %>
+                                <% if (respondModel !="" ) { %>
+                                    <h5>Datos extraídos del modelo de inteligenica artificial:</h5>
+                                    <div class="containerTable">
+                                        <div class="horizontal-table">
+                                            <% let First=true; %>
+                                                <% for(jso in respondModel) { %>
+                                                    <% if (First) { %>
+                                                        <div id="head" class="horizontal-row">
+                                                            <% for (const info in respondModel[jso]) { %>
+                                                                <div class="horizontal-cell">
+                                                                    <% if (info !="descripcion" ) { %>
+                                                                        <%= info %>
+                                                                            <% } %>
+                                                                </div>
+                                                                <% } %>
+                                                        </div>
+                                                        <% First=false; %>
+                                                            <% } %>
+                                                                <% } %>
+                                                                    <% for(jso in respondModel) { %>
+                                                                        <div class="horizontal-row">
+                                                                            <% for (const info in respondModel[jso]) {
+                                                                                %>
+                                                                                <div class="horizontal-cell">
+                                                                                    <% if (info !="descripcion" ) { %>
+                                                                                        <%= respondModel[jso][info] %>
+                                                                                            <% } %>
+                                                                                </div>
+                                                                                <% } %>
+                                                                        </div>
+                                                                        <% } %>
+                                        </div>
+                                    </div>
+                                    <% } %>
             </div>
         </div>
         </div>

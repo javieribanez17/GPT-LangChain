@@ -2,3 +2,9 @@
   width: 33%;
   margin-top: 15px;
 }
+.containerFlexbtn {
+  display: flex;
+  flex-direction: row;
+  align-items: end;
+  justify-content: space-between;
+}

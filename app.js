@@ -105,31 +105,6 @@ let respondModel = "";
 let jsonOutputM;
 let jsonArray = [];
 let resultQuery;
-let nullArrayParams = [];
-const parametrs = [
-  "id",
-  "numero_paciente",
-  "iniciales",
-  "genero",
-  "edad",
-  "altura",
-  "peso",
-  "indicacion",
-  "fecha_nacimiento",
-  "nombre_product",
-  "dosis",
-  "via_de_admi",
-  "comprado_en",
-  "prod_concomitante",
-  "informante",
-  "nombre",
-  "apellido",
-  "pais",
-  "permiso",
-  "descripcion",
-  "ini_product",
-  "notificacion1",
-];
 //--------------------------------------------------------------------------
 //Certificado deshabilitado
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -157,11 +132,6 @@ try {
 }
 //Funciones de limpieza
 function upperProps(array) {
-  // if (object.medicacion) {
-  //   object.medicacion = _.map(object.medicacion, (medicacion) =>
-  //     _.upperCase(medicacion)
-  //   );
-  // }
   array.forEach((element) => {
     if (element.sintomas) {
       element.sintomas = _.map(element.sintomas, (sintoma) =>
@@ -169,7 +139,9 @@ function upperProps(array) {
       );
     }
     if (element.nombre_product) {
-      element.nombre_product = _.upperCase(element.nombre_product);
+      element.nombre_product = _.map(element.nombre_product, (nombre_product) =>
+        _.upperCase(nombre_product)
+      );
     }
   });
   return array;
@@ -178,16 +150,11 @@ function upperProps(array) {
 function fineResultQuery(arrayResutl) {
   arrayResutl.forEach((object) => {
     if (object.nombre_product) {
-      object.nombre_product = object.nombre_product.split(", ");
-      // object.prod_concomitante = _.map(object.prod_concomitante, (product) =>
-      //   _.upperCase(product)
-      // );
-    }
-    if (object.prod_concomitante) {
-      object.prod_concomitante = object.prod_concomitante.split(", ");
-      // object.prod_concomitante = _.map(object.prod_concomitante, (product) =>
-      //   _.upperCase(product)
-      // );
+      if (object.nombre_product.includes(",")) {
+        object.nombre_product = object.nombre_product.split(", ");
+      } else {
+        object.nombre_product = [object.nombre_product];
+      }
     }
     if (object.fecha_nacimiento) {
       object.fecha_nacimiento = moment
@@ -205,35 +172,31 @@ function fineResultQuery(arrayResutl) {
   });
   return arrayResutl;
 }
-function dataNullArray(arrayQuery) {
-  nullArrayParams = [];
-  parametrs.forEach((param) => {
-    if (arrayQuery[0][param] == null) {
-      nullArrayParams.push(param);
-    }
-  });
-}
 //Unión de arreglos SQL y Model
 let finalJson;
+function findById(id) {
+  return jsonArray.find((obj) => obj.id === id);
+}
 function mergeArrays(arrayJson) {
-  finalJson = arrayJson.map((obj) => ({ ...obj }));
-  finalJson.forEach((obj1) => {
+  arrayJson.forEach((obj1) => {
     const obj2 = findById(obj1.id);
     if (obj2) {
       for (const prop in obj1) {
-        if (obj1[prop] === "" && obj2[prop] !== undefined) {
+        if (obj1[prop] === null && obj2[prop] !== undefined) {
           obj1[prop] = obj2[prop];
         }
       }
+      obj1["medicacion"] = obj2.medicacion;
+      obj1["sintomas"] = obj2.sintomas;
     }
   });
-  finalJson = upperProps(finalJson);
+  return upperProps(arrayJson);
 }
 //Envío de datos HTTPS
 function sendArray(array) {
   let flagSend = 1;
   array.forEach((object) => {
-    if (object.nombre_product == [] && object.sintomas == []) {
+    if (object.nombre_product == [] || object.sintomas == []) {
       flagSend = 0;
     }
   });
@@ -284,38 +247,16 @@ app.get("/activeModel", async (req, res) => {
   } catch (err) {
     console.log("Hubo un error al comunicarse con el modelo de OpenAI: " + err);
   }
-  const finalJson = resultQuery.map((obj) => ({ ...obj }));
+  finalJson = resultQuery.map((obj) => ({ ...obj }));
   const idd = { id: resultQuery[0].id };
-  jsonOutputM = await JSON.parse(respondModel.text); //await JSON.parse(respondModel.text);
+  jsonOutputM = await JSON.parse(respondModel.text);
   jsonOutputM = { ...idd, ...jsonOutputM };
   jsonArray.push(jsonOutputM);
-  // const finalJson = jsonArray.map(obj => ({...obj}));
-
-  finalJson.forEach((obj1) => {
-    const obj2 = findById(obj1.id);
-    if (obj2) {
-      for (const prop in obj1) {
-        if (obj1[prop] === null && obj2[prop] !== undefined) {
-          obj1[prop] = obj2[prop];
-        }
-      }
-      // var nuewKey = "medicacion"
-      // var newValue = obj2.medicacion
-      // obj1[nuewKey] = newValue
-      obj1["medicacion"] = obj2.medicacion;
-      obj1["sintomas"] = obj2.sintomas;
-    }
-  });
-
-  console.log(finalJson);
+  finalJson = mergeArrays(finalJson);
+  sendArray(finalJson);
   // console.log(jsonArray);
   res.redirect("/demo3");
 });
-
-function findById(id) {
-  return jsonArray.find((obj) => obj.id === id);
-}
-
 //Respuesta al demo3
 app.post("/demo3-search", async (req, res) => {
   let numCase = req.body.numCase;
@@ -334,7 +275,7 @@ app.post("/demo3-search", async (req, res) => {
     .then((result) => {
       // Procesar resultado de la consulta
       resultQuery = result.recordset;
-      dataNullArray(resultQuery);
+      //dataNullArray(resultQuery);
       fineResultQuery(resultQuery);
     })
     .catch((err) => {
@@ -345,7 +286,6 @@ app.post("/demo3-search", async (req, res) => {
       // Cerrar la conexión
       pool.close();
     });
-  //console.log(resultQuery);
   res.redirect("/demo3");
 });
 //Respuesta del demo 1
