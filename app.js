@@ -253,10 +253,14 @@ app.get("/activeModel", async (req, res) => {
           obj1[prop] = obj2[prop];
         }
       }
+      // var nuewKey = "medicacion"
+      // var newValue = obj2.medicacion
+      // obj1[nuewKey] = newValue
+      obj1["medicacion"] = obj2.medicacion
+      obj1["sintomas"] = obj2.sintomas
     }
   })
-  finalJson[ini_product] = jsonArray[ini_product]
-
+  
   console.log(finalJson)
   // console.log(jsonArray);
   res.redirect("/demo3");
