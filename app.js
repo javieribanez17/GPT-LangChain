@@ -11,6 +11,7 @@ const pdf = require("pdf-parse");
 //Demo 3
 const superagent = require("superagent");
 const sql = require("mssql");
+const moment = require("moment");
 //Declaraciones necesarias
 require("dotenv").config();
 app.set("view engine", "ejs");
@@ -152,25 +153,44 @@ try {
 }
 //Funciones de limpieza
 function upperProps(object) {
-  object.descripcion.medicamentos = _.map(
-    object.descripcion.medicamentos,
-    (medicamento) => _.upperCase(medicamento)
-  );
-  object.descripcion.sintomas = _.map(object.descripcion.sintomas, (sintoma) =>
-    _.upperCase(sintoma)
-  );
+  if (object.medicacion) {
+    object.medicacion = _.map(object.medicacion, (medicacion) =>
+      _.upperCase(medicacion)
+    );
+  }
+  if (object.sintomas) {
+    object.sintomas = _.map(object.sintomas, (sintoma) => _.upperCase(sintoma));
+  }
   return object;
 }
 function fineResultQuery(arrayResutl) {
+  const dateArray = ["fecha_nacimiento", "ini_product", "notificacion1"];
   arrayResutl.forEach((object) => {
-    // object.genero
-    //   ? (object.genero = _.upperCase(object.genero))
-    //   : object.genero;
     if (object.prod_concomitante) {
       object.prod_concomitante = object.prod_concomitante.split(", ");
       object.prod_concomitante = _.map(object.prod_concomitante, (product) =>
         _.upperCase(product)
       );
+      if (object.fecha_nacimiento) {
+        object.fecha_nacimiento = moment(object.fecha_nacimiento).format(
+          "DD/MM/YYYY"
+        );
+      }
+      if (object.ini_product) {
+        object.ini_product = moment(object.ini_product).format("DD/MM/YYYY");
+      }
+      if (object.notificacion1) {
+        object.notificacion1 = moment(object.notificacion1).format(
+          "DD/MM/YYYY"
+        );
+      }
+      // dateArray.forEach((date) => {
+      //   console.log(date);
+      //   if (object[date]) {
+      //     object.date = moment(arrayResutl[0].date).format("DD/MM/YYYY");
+      //     console.log(object.date);
+      //   }
+      // });
     }
   });
   return arrayResutl;
@@ -219,10 +239,9 @@ app.get("/activeModel", async (req, res) => {
     console.log("Hubo un error al comunicarse con el modelo de OpenAI: " + err);
   }
   const idd = { id: resultQuery[0].id };
-  jsonOutputM = await JSON.parse(respondModel.text); //upperProps(await JSON.parse(respondModel.text));
+  jsonOutputM = upperProps(await JSON.parse(respondModel.text)); //await JSON.parse(respondModel.text);
   jsonOutputM = { ...idd, ...jsonOutputM };
   jsonArray.push(jsonOutputM);
-  console.log(jsonArray);
   res.redirect("/demo3");
 });
 //Respuesta al demo3
@@ -254,17 +273,7 @@ app.post("/demo3-search", async (req, res) => {
       // Cerrar la conexión
       pool.close();
     });
-  // try {
-  //   qModel = await prompt.format({
-  //     text: resultQuery[0].descripcion,
-  //   });
-  //   respondModel = await chain.call({ text: qModel });
-  // } catch (err) {
-  //   console.log("Hubo un error al comunicarse con el modelo de OpenAI: " + err);
-  // }
-  // jsonOutputM = await JSON.parse(respondModel.text); //upperProps(await JSON.parse(respondModel.text));
-  // jsonArray.push(jsonOutputM);
-
+  //console.log(resultQuery);
   res.redirect("/demo3");
 });
 //Respuesta del demo 1
