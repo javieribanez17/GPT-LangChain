@@ -242,8 +242,29 @@ app.get("/activeModel", async (req, res) => {
   jsonOutputM = upperProps(await JSON.parse(respondModel.text)); //await JSON.parse(respondModel.text);
   jsonOutputM = { ...idd, ...jsonOutputM };
   jsonArray.push(jsonOutputM);
+  const finalJson = jsonArray.map((obj) => ({ ...obj }));
+
+  finalJson.forEach((obj1) => {
+    const obj2 = findById(obj1.id);
+    if (obj2) {
+      for (const prop in obj1) {
+        console.log("modelo: " + obj1[prop] + " db: " + obj2[prop]);
+        if (obj1[prop] === "" && obj2[prop] !== undefined) {
+          obj1[prop] = obj2[prop];
+        }
+      }
+    }
+  });
+
+  console.log(finalJson);
+  console.log(jsonArray);
   res.redirect("/demo3");
 });
+
+function findById(id) {
+  return resultQuery.find((obj) => obj.id === id);
+}
+
 //Respuesta al demo3
 app.post("/demo3-search", async (req, res) => {
   let numCase = req.body.numCase;
