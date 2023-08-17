@@ -39,7 +39,11 @@ const parser = StructuredOutputParser.fromZodSchema(
     peso: z.string().describe("Peso"),
     indicacion: z.string().describe("Indicación médica del paciente"),
     fecha_nacimiento: z.string().describe("Fecha de nacimiento"),
-    nombre_product: z.string().describe("Nombre del producto sospechoso"),
+    nombre_product: z
+      .string()
+      .describe(
+        "Cuál es el producto sospechoso de causar los sintomas del paciente"
+      ),
     dosis: z.string().describe("Dosis del medicamento consumida"),
     via_de_admi: z.string().describe("Vía de administración del medicamento"),
     comprado_en: z.string().describe("Dónde fue comprado el prodcuto"),
@@ -57,12 +61,12 @@ const parser = StructuredOutputParser.fromZodSchema(
     notificacion1: z.string().describe("¿Cuando realizó el primer reporte?"),
     //descripcion
     medicacion: z.array(z.string()).describe("Medicación previa del paciente"),
-    // medicamentos: z
-    //   .array(z.string())
-    //   .describe("Medicamentos consumidos por el paciente"),
     sintomas: z
       .array(z.string())
       .describe("Dime cada uno de los sintomas del paciente"),
+    // medicamentos: z
+    //   .array(z.string())
+    //   .describe("Medicamentos consumidos por el paciente"),
   })
 );
 const formatInstructions = parser.getFormatInstructions();
@@ -76,7 +80,7 @@ const prompt = new PromptTemplate({
 const model = new OpenAI({
   modelName: "gpt-3.5-turbo",
   openAIApiKey: process.env.OPEN_AI_KEY,
-  temperature: 0,
+  temperature: 0.2,
 });
 const chain = new LLMChain({
   llm: model,
@@ -152,45 +156,51 @@ try {
   console.log(err);
 }
 //Funciones de limpieza
-function upperProps(object) {
-  if (object.medicacion) {
-    object.medicacion = _.map(object.medicacion, (medicacion) =>
-      _.upperCase(medicacion)
-    );
-  }
-  if (object.sintomas) {
-    object.sintomas = _.map(object.sintomas, (sintoma) => _.upperCase(sintoma));
-  }
-  return object;
+function upperProps(array) {
+  // if (object.medicacion) {
+  //   object.medicacion = _.map(object.medicacion, (medicacion) =>
+  //     _.upperCase(medicacion)
+  //   );
+  // }
+  array.forEach((element) => {
+    if (element.sintomas) {
+      element.sintomas = _.map(element.sintomas, (sintoma) =>
+        _.upperCase(sintoma)
+      );
+    }
+    if (element.nombre_product) {
+      element.nombre_product = _.upperCase(element.nombre_product);
+    }
+  });
+  return array;
 }
+
 function fineResultQuery(arrayResutl) {
-  const dateArray = ["fecha_nacimiento", "ini_product", "notificacion1"];
   arrayResutl.forEach((object) => {
+    if (object.nombre_product) {
+      object.nombre_product = object.nombre_product.split(", ");
+      // object.prod_concomitante = _.map(object.prod_concomitante, (product) =>
+      //   _.upperCase(product)
+      // );
+    }
     if (object.prod_concomitante) {
       object.prod_concomitante = object.prod_concomitante.split(", ");
-      object.prod_concomitante = _.map(object.prod_concomitante, (product) =>
-        _.upperCase(product)
-      );
-      if (object.fecha_nacimiento) {
-        object.fecha_nacimiento = moment(object.fecha_nacimiento).format(
-          "DD/MM/YYYY"
-        );
-      }
-      if (object.ini_product) {
-        object.ini_product = moment(object.ini_product).format("DD/MM/YYYY");
-      }
-      if (object.notificacion1) {
-        object.notificacion1 = moment(object.notificacion1).format(
-          "DD/MM/YYYY"
-        );
-      }
-      // dateArray.forEach((date) => {
-      //   console.log(date);
-      //   if (object[date]) {
-      //     object.date = moment(arrayResutl[0].date).format("DD/MM/YYYY");
-      //     console.log(object.date);
-      //   }
-      // });
+      // object.prod_concomitante = _.map(object.prod_concomitante, (product) =>
+      //   _.upperCase(product)
+      // );
+    }
+    if (object.fecha_nacimiento) {
+      object.fecha_nacimiento = moment
+        .utc(object.fecha_nacimiento)
+        .format("DD/MM/YYYY");
+    }
+    if (object.ini_product) {
+      object.ini_product = moment.utc(object.ini_product).format("DD/MM/YYYY");
+    }
+    if (object.notificacion1) {
+      object.notificacion1 = moment
+        .utc(object.notificacion1)
+        .format("DD/MM/YYYY");
     }
   });
   return arrayResutl;
@@ -202,6 +212,42 @@ function dataNullArray(arrayQuery) {
       nullArrayParams.push(param);
     }
   });
+}
+//Unión de arreglos SQL y Model
+let finalJson;
+function mergeArrays(arrayJson) {
+  finalJson = arrayJson.map((obj) => ({ ...obj }));
+  finalJson.forEach((obj1) => {
+    const obj2 = findById(obj1.id);
+    if (obj2) {
+      for (const prop in obj1) {
+        if (obj1[prop] === "" && obj2[prop] !== undefined) {
+          obj1[prop] = obj2[prop];
+        }
+      }
+    }
+  });
+  finalJson = upperProps(finalJson);
+}
+//Envío de datos HTTPS
+function sendArray(array) {
+  let flagSend = 1;
+  array.forEach((object) => {
+    if (object.nombre_product == [] && object.sintomas == []) {
+      flagSend = 0;
+    }
+  });
+  if (flagSend == 1) {
+    superagent
+      .post(process.env.HTTPS_SERVER)
+      .send(array)
+      .then(console.log("Envío realizado"))
+      .catch(console.error);
+  } else {
+    console.log(
+      "No se pudo realizar el envío de los datos debido a que faltan los sintomas o el producto sospechoso"
+    );
+  }
 }
 //------------------------------------- Servidor -------------------------------------
 //Llamando al home del servidor
@@ -222,10 +268,10 @@ app.get("/demo2", (req, res) => {
 //Llamado al demo 3
 app.get("/demo3", async (req, res) => {
   res.render("demo3", {
-    resultQuery: JSON.stringify(resultQuery),
     paciente: resultQuery,
     respondModel: jsonArray,
   });
+  jsonArray = [];
 });
 //Respuesta a petición del modelo
 app.get("/activeModel", async (req, res) => {
@@ -239,25 +285,12 @@ app.get("/activeModel", async (req, res) => {
     console.log("Hubo un error al comunicarse con el modelo de OpenAI: " + err);
   }
   const idd = { id: resultQuery[0].id };
-  jsonOutputM = upperProps(await JSON.parse(respondModel.text)); //await JSON.parse(respondModel.text);
+  jsonOutputM = await JSON.parse(respondModel.text); //await JSON.parse(respondModel.text);
   jsonOutputM = { ...idd, ...jsonOutputM };
   jsonArray.push(jsonOutputM);
-  const finalJson = jsonArray.map((obj) => ({ ...obj }));
+  mergeArrays(jsonArray);
+  //Envío de datos por HTTPS
 
-  finalJson.forEach((obj1) => {
-    const obj2 = findById(obj1.id);
-    if (obj2) {
-      for (const prop in obj1) {
-        console.log("modelo: " + obj1[prop] + " db: " + obj2[prop]);
-        if (obj1[prop] === "" && obj2[prop] !== undefined) {
-          obj1[prop] = obj2[prop];
-        }
-      }
-    }
-  });
-
-  console.log(finalJson);
-  console.log(jsonArray);
   res.redirect("/demo3");
 });
 
@@ -314,12 +347,11 @@ app.post("/gpt", async function (req, res) {
   //Redirect same page
   res.redirect("/demo1");
   //Envío de datos por HTTPS
-  superagent
-    .post(process.env.HTTPS_SERVER)
-    .send(jsonArray)
-    .then(console.log("Envío realizado"))
-    .catch(console.error);
-
+  // superagent
+  //   .post(process.env.HTTPS_SERVER)
+  //   .send(jsonArray)
+  //   .then(console.log("Envío realizado"))
+  //   .catch(console.error);
   jsonArray = [];
 });
 //Página con archivo de carga
@@ -373,11 +405,11 @@ app
       }
     }
     //Envío de datos por HTTPS
-    superagent
-      .post(process.env.HTTPS_SERVER)
-      .send(respondModelA)
-      .then(console.log("Envío realizado"))
-      .catch(console.error);
+    // superagent
+    //   .post(process.env.HTTPS_SERVER)
+    //   .send(respondModelA)
+    //   .then(console.log("Envío realizado"))
+    //   .catch(console.error);
     //Renderiza la tabla con los datos
     res.render("demo2", {
       pdfTitle: pdfTitle,
