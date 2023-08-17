@@ -218,31 +218,32 @@ app.get("/activeModel", async (req, res) => {
   } catch (err) {
     console.log("Hubo un error al comunicarse con el modelo de OpenAI: " + err);
   }
+  const finalJson = resultQuery.map(obj => ({...obj}));
   const idd = { id: resultQuery[0].id };
   jsonOutputM = await JSON.parse(respondModel.text); //upperProps(await JSON.parse(respondModel.text));
   jsonOutputM = { ...idd, ...jsonOutputM };
   jsonArray.push(jsonOutputM);
-  const finalJson = jsonArray.map(obj => ({...obj}));
+  // const finalJson = jsonArray.map(obj => ({...obj}));
 
   finalJson.forEach(obj1 => {
     const obj2 = findById(obj1.id);
     if(obj2){
       for (const prop in obj1){
-        console.log("modelo: " + obj1[prop] + " db: " + obj2[prop])
-        if(obj1[prop] === "" && obj2[prop] !== undefined){
+        if(obj1[prop] === null && obj2[prop] !== undefined){
           obj1[prop] = obj2[prop];
         }
       }
     }
   })
+  finalJson[ini_product] = jsonArray[ini_product]
 
   console.log(finalJson)
-  console.log(jsonArray);
+  // console.log(jsonArray);
   res.redirect("/demo3");
 });
 
 function findById(id){
-  return resultQuery.find(obj => obj.id === id);
+  return jsonArray.find(obj => obj.id === id);
 }
 
 //Respuesta al demo3
