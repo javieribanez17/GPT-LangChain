@@ -15,6 +15,9 @@
 <body>
     <%- include("partials/navBar"); -%>
         <div id="general">
+            <div id="loaderContainer">
+                <div id="loader"></div>
+            </div>
             <div class="containerG">
                 <br>
                 <h4>Escribe el número de caso</h4>
@@ -25,7 +28,7 @@
                                 placeholder="ej: '1', '2', '3'" aria-label="Recipient's username"
                                 aria-describedby="basic-addon2">
                             <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" style="margin-left: 5px;"
+                                <button class="btn btn-outline-secondary consult" style="margin-left: 5px;"
                                     type="submit">Consultar</button>
                             </div>
                         </div>
@@ -39,7 +42,7 @@
                         <div>
                             <form action="/activeModel" method="get">
                                 <input type="text" name="" id="" hidden>
-                                <button style="margin-bottom: 10px;" class="btn btn-primary" id="modelButton"
+                                <button style="margin-bottom: 10px;" class="btn btn-primary consult" id="modelButton"
                                     type="submit" name="sendRequest">Analizar</button>
                             </form>
                         </div>

@@ -196,7 +196,7 @@ function mergeArrays(arrayJson) {
 function sendArray(array) {
   let flagSend = 1;
   array.forEach((object) => {
-    if (object.nombre_product == [] || object.sintomas == []) {
+    if (object.nombre_product.length === 0 || object.sintomas.length === 0) {
       flagSend = 0;
     }
   });
