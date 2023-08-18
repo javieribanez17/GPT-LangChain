@@ -25,6 +25,8 @@ const { StructuredOutputParser } = require("langchain/output_parsers");
 const { z, object } = require("zod");
 //Variables de entorno
 const PORT = process.env.PORT || 5000;
+const descripcion =
+  "PSP Patient ID: COL-105011 LATAM Administration route: IM indication: Esquizofrenia LATAM Previous Medication: RISPEDRAL 25 MG, CLOZAPINA, BIPERIDENO, ESCITALOPRAM, INSULINA LATAM Dose: 100 mg familiar refiere el 1/jun/2023 que paciente se encuentra agresiva, acelerada, lo asocia a la falta del medicamento, aclara que presenta inconvenientes administrativos ante la EPS. No brinda más información. Al día de hoy 1/jun/2023 paciente continua síntomas Fecha de inicio de tratamiento: 15/feb/2023. Fecha de la última aplicación 16/mar/2023. Medicamento concomitante: sin información. No cuenta con la muestra por lo que no se tiene acceso a lote. Medicamento no autoriza contacto y no acepta que Janssen realice contacto con médico tratante, no cuenta con los datos de contacto medico tratante.";
 //------------------------------------- Modelo para Janssen -------------------------------------
 const parser = StructuredOutputParser.fromZodSchema(
   z.object({
@@ -39,11 +41,9 @@ const parser = StructuredOutputParser.fromZodSchema(
     peso: z.string().describe("Peso"),
     indicacion: z.string().describe("Indicación médica del paciente"),
     fecha_nacimiento: z.string().describe("Fecha de nacimiento"),
-    nombre_product: z
+    producto_sospechoso: z
       .array(z.string())
-      .describe(
-        "Cuál es el producto sospechoso de causar los sintomas del paciente"
-      ),
+      .describe("Productos aplicados en el paciente o sospechosos"),
     dosis: z.string().describe("Dosis del medicamento consumida"),
     via_de_admi: z.string().describe("Vía de administración del medicamento"),
     comprado_en: z.string().describe("Dónde fue comprado el prodcuto"),
@@ -53,7 +53,11 @@ const parser = StructuredOutputParser.fromZodSchema(
     informante: z.string().describe("Relación del informante con el paciente"),
     nombre: z.string().describe("Nombre del informante"),
     apellido: z.string().describe("Apellido del informante"),
-    pais: z.string().describe("País desde donde reporta"),
+    pais: z
+      .string()
+      .describe(
+        "Dime el nombre del país desde donde reporta pero no digas LATAM"
+      ),
     permiso: z.string().describe("¿Hay autorización para contactar?"),
     ini_product: z
       .string()
@@ -64,23 +68,21 @@ const parser = StructuredOutputParser.fromZodSchema(
     sintomas: z
       .array(z.string())
       .describe("Dime cada uno de los sintomas del paciente"),
-    // medicamentos: z
-    //   .array(z.string())
-    //   .describe("Medicamentos consumidos por el paciente"),
   })
 );
 const formatInstructions = parser.getFormatInstructions();
 const prompt = new PromptTemplate({
   template:
-    "Extrae y determina la siguiente información:\n{format_instructions}\nDel texto:\n{text}\n" +
-    "Ten en cuenta que sino puedes extraer algún dato del texto debes dejar su valor vacío",
+    "Extrae la siguiente información:\n{format_instructions}\nDel texto:\n{text}\n" +
+    "Ten en cuenta que sino puedes extraer algún dato del texto debes dejar su valor vacío " +
+    "y dar los sintomas en su forma sustantiva",
   inputVariables: ["text"],
   partialVariables: { format_instructions: formatInstructions },
 });
 const model = new OpenAI({
   modelName: "gpt-3.5-turbo",
   openAIApiKey: process.env.OPEN_AI_KEY,
-  temperature: 0.2,
+  temperature: 0,
 });
 const chain = new LLMChain({
   llm: model,
@@ -138,9 +140,10 @@ function upperProps(array) {
         _.upperCase(sintoma)
       );
     }
-    if (element.nombre_product) {
-      element.nombre_product = _.map(element.nombre_product, (nombre_product) =>
-        _.upperCase(nombre_product)
+    if (element.producto_sospechoso) {
+      element.producto_sospechoso = _.map(
+        element.producto_sospechoso,
+        (producto_sospechoso) => _.upperCase(producto_sospechoso)
       );
     }
   });
@@ -149,11 +152,11 @@ function upperProps(array) {
 
 function fineResultQuery(arrayResutl) {
   arrayResutl.forEach((object) => {
-    if (object.nombre_product) {
-      if (object.nombre_product.includes(",")) {
-        object.nombre_product = object.nombre_product.split(", ");
+    if (object.producto_sospechoso) {
+      if (object.producto_sospechoso.includes(",")) {
+        object.producto_sospechoso = object.producto_sospechoso.split(", ");
       } else {
-        object.nombre_product = [object.nombre_product];
+        object.producto_sospechoso = [object.producto_sospechoso];
       }
     }
     if (object.fecha_nacimiento) {
@@ -197,13 +200,19 @@ let justify = "";
 async function sendArray(array) {
   let flagSend = 1;
   await array.forEach((object) => {
-    if (object.nombre_product.length === 0 || object.sintomas.length === 0) {
+    if (
+      object.producto_sospechoso.length === 0 ||
+      object.sintomas.length === 0
+    ) {
       flagSend = 0;
-      if (object.nombre_product.length === 0 && object.sintomas.length === 0) {
+      if (
+        object.producto_sospechoso.length === 0 &&
+        object.sintomas.length === 0
+      ) {
         justify =
           "No se puede evaluar el Triage sin el producto sospechoso y los sintomas";
       } else if (
-        object.nombre_product.length === 1 &&
+        object.producto_sospechoso.length === 1 &&
         object.sintomas.length === 0
       ) {
         justify = "No se puede evaluar el Triage sin los sintomas";
@@ -233,6 +242,7 @@ app.get("/demo1", (req, res) => {
   res.render("demo1", {
     respondModel: respondModel.text,
     consultPrev: consultPrev,
+    justify: justify,
   });
 });
 //Llamando al demo 2
@@ -274,7 +284,7 @@ app.post("/demo3-search", async (req, res) => {
   let numCase = req.body.numCase;
   let orderColumns =
     "id, numero_paciente, iniciales, genero, edad, altura, peso, " +
-    "indicacion, fecha_nacimiento, nombre_product, dosis, via_de_admi, comprado_en, " +
+    "indicacion, fecha_nacimiento, producto_sospechoso, dosis, via_de_admi, comprado_en, " +
     "prod_concomitante, informante, nombre, apellido, pais, permiso, descripcion, ini_product, notificacion1";
   // Abrir la conexión
   await pool
@@ -313,15 +323,13 @@ app.post("/gpt", async function (req, res) {
     console.log("Hubo un error al comunicarse con el modelo de OpenAI: " + err);
   }
   jsonOutputM = await JSON.parse(respondModel.text); //upperProps(await JSON.parse(respondModel.text));
+  const idd = { id: 111 };
+  jsonOutputM = { ...idd, ...jsonOutputM };
   jsonArray.push(jsonOutputM);
+  upperProps(jsonArray);
+  sendArray(jsonArray);
   //Redirect same page
   res.redirect("/demo1");
-  //Envío de datos por HTTPS
-  // superagent
-  //   .post(process.env.HTTPS_SERVER)
-  //   .send(jsonArray)
-  //   .then(console.log("Envío realizado"))
-  //   .catch(console.error);
   jsonArray = [];
 });
 //Página con archivo de carga
@@ -374,13 +382,6 @@ app
         }
       }
     }
-    //Envío de datos por HTTPS
-    // superagent
-    //   .post(process.env.HTTPS_SERVER)
-    //   .send(respondModelA)
-    //   .then(console.log("Envío realizado"))
-    //   .catch(console.error);
-    //Renderiza la tabla con los datos
     res.render("demo2", {
       pdfTitle: pdfTitle,
       paciente: respondModelA,
@@ -388,12 +389,8 @@ app
     });
   });
 //Route for excel and Power BI
-app.get("/test", (req, res) => {
-  res.render("demoTest", {
-    pdfTitle: pdfTitle,
-    paciente: respondModelA,
-    consultPrev: consultPrev,
-  });
+app.get("/triage", (req, res) => {
+  res.render("triage");
 });
 //Inicialización del servidor
 app.listen(PORT, function () {

@@ -12,57 +12,56 @@
 
 <body>
     <%- include("partials/navBar"); -%>
-    <% let text="" ; %>
-        <div class="containerG">
+        <% let text="" ; %>
             <div class="containerG">
-                <h1>Medical Intelligence</h1>
-                <p>Herramienta de inteligencia artificial para la extracción de datos a partir de reportes de
-                    efectos
-                    adversos
-                </p>
-                <form action="/upload" method="post">
-                    <p>Análisis del documento <strong>
-                            <%= pdfTitle %>
-                        </strong> <button style="color: red;" type="submit" class="close" aria-label="Close">
-                            <span aria-hidden="true"> &times;</span>
-                        </button></p>
-                </form>
-                <label for="askModel">Respuesta del modelo GPT:</label>
+                <div class="containerG">
+                    <h1>Medical Intelligence</h1>
+                    <p>Herramienta de inteligencia artificial para la extracción de datos a partir de reportes de
+                        efectos
+                        adversos
+                    </p>
+                    <form action="/upload" method="post">
+                        <p>Análisis del documento <strong>
+                                <%= pdfTitle %>
+                            </strong> <button style="color: red;" type="submit" class="close" aria-label="Close">
+                                <span aria-hidden="true"> &times;</span>
+                            </button></p>
+                    </form>
+                    <label for="askModel">Respuesta del modelo GPT:</label>
 
-                <div class="containerTable">
-                    <div class="horizontal-table">
-                        <% let First=true; %>
-                        <% for(jso in paciente) { %>
-                            <% if (First) { %>
-                                <div id="head" class="horizontal-row">
-                                    <% for (const info in paciente[jso]) { %> 
-                                        <div class="horizontal-cell">
-                                            <%= info %>
+                    <div class="containerTable">
+                        <div class="horizontal-table">
+                            <% let First=true; %>
+                                <% for(jso in paciente) { %>
+                                    <% if (First) { %>
+                                        <div id="head" class="horizontal-row">
+                                            <% for (const info in paciente[jso]) { %>
+                                                <div class="horizontal-cell">
+                                                    <%= info %>
+                                                </div>
+                                                <% } %>
                                         </div>
-                                    <% } %>
-                                </div>
-                                <% First=false; %>
-                            <% } %>
-                        <% } %>  
-                        <% for(jso in paciente) { %>
-                            <div class="horizontal-row">
-                                <% for (const info in paciente[jso]) { %> 
-                                    <div class="horizontal-cell">
-                                        <%= paciente[jso][info] %>
-                                    </div>
-                                <% } %>
-                            </div>
-                        <% } %> 
+                                        <% First=false; %>
+                                            <% } %>
+                                                <% } %>
+                                                    <% for(jso in paciente) { %>
+                                                        <div class="horizontal-row">
+                                                            <% for (const info in paciente[jso]) { %>
+                                                                <div class="horizontal-cell">
+                                                                    <%= paciente[jso][info] %>
+                                                                </div>
+                                                                <% } %>
+                                                        </div>
+                                                        <% } %>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    <%- include("partials/footer"); -%>
+            </div>
 
-                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-                    integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
-                    crossorigin="anonymous"></script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+                crossorigin="anonymous"></script>
 </body>
 
 </html>

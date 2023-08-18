@@ -23,14 +23,12 @@ if (document.getElementById("btn-upload")) {
 }
 if (document.getElementById("btn-triage")) {
   document.getElementById("btn-triage").addEventListener("click", function () {
-    console.log("click on me");
-    window.open("/test");
+    window.open("/triage");
   });
 }
 
 if (document.getElementsByClassName("consult")) {
   const btnConsults = document.getElementsByClassName("consult");
-  console.log(btnConsults.length);
   for (var i = 0; i < btnConsults.length; i++) {
     btnConsults[i].addEventListener("click", function () {
       var container = document.getElementById("loaderContainer");

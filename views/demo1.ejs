@@ -27,20 +27,27 @@
                 <p>Reporte de efecto adverso consultado: <i><strong>
                             <%= consultPrev %>
                         </strong></i></p>
-                <form action="/gpt" method="post">
-                    <div class="form-group">
-                        <label for="questionModel">Escriba la descripción del reporte de efecto adverso:</label>
-                        <textarea class="form-control" id="questionModel" name="questionModel" rows="5"></textarea>
-                    </div>
-                    <div class="containerFlexButton">
-                        <div>
-                            <button id="btn-txt-area" class="btn btn-primary" type="submit" name="sendRequest"
-                                disabled>Enviar</button>
-                        </div>
-                    </div>
-                </form>
+                <% if (justify !="" ) { %>
+                    <span style="margin-bottom: 10px; color: red;">
+                        <i>
+                            <%= justify %>
+                        </i>
+                    </span>
+                    <% } %>
+                        <form action="/gpt" method="post">
+                            <div class="form-group">
+                                <label for="questionModel">Escriba la descripción del reporte de efecto adverso:</label>
+                                <textarea class="form-control" id="questionModel" name="questionModel"
+                                    rows="5"></textarea>
+                            </div>
+                            <div class="containerFlexButton">
+                                <div>
+                                    <button id="btn-txt-area" class="btn btn-primary" type="submit" name="sendRequest"
+                                        disabled>Enviar</button>
+                                </div>
+                            </div>
+                        </form>
             </div>
-            <%- include("partials/footer"); -%>
         </div>
 
 

@@ -1,7 +1,10 @@
+* {
+  margin: 0;
+  padding: 0;
+}
 .containerG {
   width: 80%;
   margin-left: 10%;
-  padding-bottom: 50px;
 }
 
 #carrusel {
@@ -49,8 +52,9 @@
 
 .horizontal-cell {
   display: table-cell;
+  text-align: center;
   border: 1px solid #ccc;
-  padding: 5px;
+  padding: 10px;
 }
 #head {
   font-weight: bold;
@@ -58,7 +62,7 @@
 }
 
 .btn-redirect {
-  background-color: #ffffff;
+  background-color: #039fdc5e;
   border-radius: 40em;
   border-style: none;
   box-shadow: #039ddc 0 -12px 6px inset;
@@ -90,17 +94,15 @@
 
 #general {
   padding-top: 60px;
-  display: flex;
-  position: relative;
-  min-height: 100vh;
 }
 
 #footer {
-  position: absolute;
-  bottom: 0;
   background-color: #333;
+  margin-top: 20px;
+  height: 100px;
   color: white;
   text-align: center;
+  display: block;
 }
 
 #header {
