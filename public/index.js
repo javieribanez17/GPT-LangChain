@@ -21,3 +21,9 @@ if (document.getElementById("btn-upload")) {
     container.style.display = "block";
   });
 }
+if (document.getElementById("btn-triage")) {
+  document.getElementById("btn-triage").addEventListener("click", function () {
+    console.log("click on me");
+    window.open("/test");
+  });
+}

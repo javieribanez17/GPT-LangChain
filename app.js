@@ -40,7 +40,7 @@ const parser = StructuredOutputParser.fromZodSchema(
     indicacion: z.string().describe("Indicación médica del paciente"),
     fecha_nacimiento: z.string().describe("Fecha de nacimiento"),
     nombre_product: z
-      .string()
+      .array(z.string())
       .describe(
         "Cuál es el producto sospechoso de causar los sintomas del paciente"
       ),
@@ -193,23 +193,34 @@ function mergeArrays(arrayJson) {
   return upperProps(arrayJson);
 }
 //Envío de datos HTTPS
-function sendArray(array) {
+let justify = "";
+async function sendArray(array) {
   let flagSend = 1;
-  array.forEach((object) => {
-    if (object.nombre_product == [] || object.sintomas == []) {
+  await array.forEach((object) => {
+    if (object.nombre_product.length === 0 || object.sintomas.length === 0) {
       flagSend = 0;
+      if (object.nombre_product.length === 0 && object.sintomas.length === 0) {
+        justify =
+          "No se puede evaluar el Triage sin el producto sospechoso y los sintomas";
+      } else if (
+        object.nombre_product.length === 1 &&
+        object.sintomas.length === 0
+      ) {
+        justify = "No se puede evaluar el Triage sin los sintomas";
+      } else {
+        justify = "No se puede evaluar el Triage sin el producto sospechoso";
+      }
     }
   });
-  if (flagSend == 1) {
+  if (flagSend === 1) {
+    justify = "";
     superagent
       .post(process.env.HTTPS_SERVER)
       .send(array)
       .then(console.log("Envío realizado"))
       .catch(console.error);
   } else {
-    console.log(
-      "No se pudo realizar el envío de los datos debido a que faltan los sintomas o el producto sospechoso"
-    );
+    console.log(justify);
   }
 }
 //------------------------------------- Servidor -------------------------------------
@@ -233,6 +244,7 @@ app.get("/demo3", async (req, res) => {
   res.render("demo3", {
     paciente: resultQuery,
     respondModel: jsonArray,
+    justify: justify,
   });
   jsonArray = [];
 });

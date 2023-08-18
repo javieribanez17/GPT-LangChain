@@ -25,7 +25,7 @@
                                 placeholder="ej: '1', '2', '3'" aria-label="Recipient's username"
                                 aria-describedby="basic-addon2">
                             <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" style="margin-left: 5px;"
+                                <button class="btn btn-outline-secondary" id="btn-test" style="margin-left: 5px;"
                                     type="submit">Consultar</button>
                             </div>
                         </div>
@@ -34,7 +34,7 @@
                 <% if (paciente) { %>
                     <div class="containerFlexbtn">
                         <div>
-                            <h5>Datos extraídos del modelo de inteligenica artificial:</h5>
+                            <h5>Datos extraídos de la base de datos:</h5>
                         </div>
                         <div>
                             <form action="/activeModel" method="get">
@@ -85,7 +85,21 @@
                             </p>
                             <% } %>
                                 <% if (respondModel !="" ) { %>
-                                    <h5>Datos extraídos del modelo de inteligenica artificial:</h5>
+                                    <div class="containerFlexbtn">
+                                        <h5>Datos extraídos del modelo de inteligenica artificial:</h5>
+                                        <% if (justify !="" ) { %>
+                                            <span style="margin-bottom: 10px; color: red;">
+                                                <i>
+                                                    <%= justify %>
+                                                </i>
+                                            </span>
+                                            <% } else { %>
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-outline-secondary" id="btn-triage"
+                                                        style="margin-bottom: 10px;" type="submit">Triage</button>
+                                                </div>
+                                                <% } %>
+                                    </div>
                                     <div class="containerTable">
                                         <div class="horizontal-table">
                                             <% let First=true; %>
@@ -125,6 +139,7 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
             crossorigin="anonymous"></script>
+
 </body>
 <script src="/index.js"></script>
 
