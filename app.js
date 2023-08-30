@@ -25,8 +25,6 @@ const { StructuredOutputParser } = require("langchain/output_parsers");
 const { z, object } = require("zod");
 //Variables de entorno
 const PORT = process.env.PORT || 5000;
-const descripcion =
-  "PSP Patient ID: COL-105011 LATAM Administration route: IM indication: Esquizofrenia LATAM Previous Medication: RISPEDRAL 25 MG, CLOZAPINA, BIPERIDENO, ESCITALOPRAM, INSULINA LATAM Dose: 100 mg familiar refiere el 1/jun/2023 que paciente se encuentra agresiva, acelerada, lo asocia a la falta del medicamento, aclara que presenta inconvenientes administrativos ante la EPS. No brinda más información. Al día de hoy 1/jun/2023 paciente continua síntomas Fecha de inicio de tratamiento: 15/feb/2023. Fecha de la última aplicación 16/mar/2023. Medicamento concomitante: sin información. No cuenta con la muestra por lo que no se tiene acceso a lote. Medicamento no autoriza contacto y no acepta que Janssen realice contacto con médico tratante, no cuenta con los datos de contacto medico tratante.";
 //------------------------------------- Modelo para Janssen -------------------------------------
 const parser = StructuredOutputParser.fromZodSchema(
   z.object({
@@ -67,7 +65,7 @@ const parser = StructuredOutputParser.fromZodSchema(
     medicacion: z.array(z.string()).describe("Medicación previa del paciente"),
     sintomas: z
       .array(z.string())
-      .describe("Dime cada uno de los sintomas del paciente"),
+      .describe("Dime los sintomas del paciente en sustantivo singular"),
   })
 );
 const formatInstructions = parser.getFormatInstructions();
@@ -75,7 +73,7 @@ const prompt = new PromptTemplate({
   template:
     "Extrae la siguiente información:\n{format_instructions}\nDel texto:\n{text}\n" +
     "Ten en cuenta que sino puedes extraer algún dato del texto debes dejar su valor vacío " +
-    "y dar los sintomas en su forma sustantiva",
+    "y dar los sintomas en su forma sustantiva singular",
   inputVariables: ["text"],
   partialVariables: { format_instructions: formatInstructions },
 });
@@ -210,14 +208,16 @@ async function sendArray(array) {
         object.sintomas.length === 0
       ) {
         justify =
-          "No se puede evaluar el Triage sin el producto sospechoso y los sintomas";
+          "No se puede generar el Triage por la falta de los datos de: Producto sospechoso y Síntomas";
       } else if (
         object.producto_sospechoso.length === 1 &&
         object.sintomas.length === 0
       ) {
-        justify = "No se puede evaluar el Triage sin los sintomas";
+        justify =
+          "No se puede generar el Triage por la falta de datos de Síntomas";
       } else {
-        justify = "No se puede evaluar el Triage sin el producto sospechoso";
+        justify =
+          "No se puede generar el Triage por la falta de datos de Producto sospechoso";
       }
     }
   });
@@ -261,6 +261,8 @@ app.get("/demo3", async (req, res) => {
 //Respuesta a petición del modelo
 app.get("/activeModel", async (req, res) => {
   let qModel = "";
+  let qModel2 = "";
+  let respondModel2 = "";
   try {
     qModel = await prompt.format({
       text: resultQuery[0].descripcion,

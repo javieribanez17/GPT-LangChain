@@ -26,7 +26,7 @@
                     <form action="/demo3-search" method="post">
                         <div class="input-group mb-3">
                             <input type="number" name="numCase" class="form-control" style="border-radius: 10px;"
-                                placeholder="ej: '1', '2', '3'" aria-label="Recipient's username"
+                                placeholder="ej: '1', '2', '3'" min="1" max="7" aria-label="Recipient's username"
                                 aria-describedby="basic-addon2">
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary consult" style="margin-left: 5px;"
@@ -92,7 +92,7 @@
                                     <div class="containerFlexbtn">
                                         <h5>Datos extraídos del modelo de inteligenica artificial:</h5>
                                         <% if (justify !="" ) { %>
-                                            <span style="margin-bottom: 10px; color: red;">
+                                            <span style="margin-bottom: 5px; color: red;">
                                                 <i>
                                                     <%= justify %>
                                                 </i>
