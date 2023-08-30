@@ -65,15 +65,19 @@ const parser = StructuredOutputParser.fromZodSchema(
     medicacion: z.array(z.string()).describe("Medicación previa del paciente"),
     sintomas: z
       .array(z.string())
-      .describe("Dime los sintomas del paciente en sustantivo singular"),
+      .describe(
+        "Dime en forma de sustantivo singular cada uno de los sintomas del paciente, no su enfermedad"
+      ),
   })
 );
+
 const formatInstructions = parser.getFormatInstructions();
+
 const prompt = new PromptTemplate({
   template:
     "Extrae la siguiente información:\n{format_instructions}\nDel texto:\n{text}\n" +
-    "Ten en cuenta que sino puedes extraer algún dato del texto debes dejar su valor vacío " +
-    "y dar los sintomas en su forma sustantiva singular",
+    "Ten en cuenta que si no puedes extraer algún dato del texto debes dejar su valor vacío " +
+    "y dar cada uno de los sintomas en forma sustantiva singular, da las respuestas siempre en español",
   inputVariables: ["text"],
   partialVariables: { format_instructions: formatInstructions },
 });
