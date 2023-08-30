@@ -262,6 +262,10 @@ app.get("/demo3", async (req, res) => {
   });
   jsonArray = [];
 });
+//Llamado al reporte
+app.get("/report", async (req, res) => {
+  res.render("report");
+});
 //Respuesta a petición del modelo
 app.get("/activeModel", async (req, res) => {
   let qModel = "";
